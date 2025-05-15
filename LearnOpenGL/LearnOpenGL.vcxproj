@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages\glad\include;C:\MyProject\LearnOpenGL\packages\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\glad\include;C:\MyProject\LearnOpenGL\packages\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,8 +140,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
+    <ClCompile Include="main20250513.cpp" />
     <ClCompile Include="rectangle.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="main20250512.cpp" />
+    <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="trangle.cpp" />
+    <ClCompile Include="main20250515.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\fragment.fs" />
+    <None Include="Shaders\fragment20250515.fs" />
+    <None Include="Shaders\fragment20250513.fs" />
+    <None Include="Shaders\vertex.vs" />
+    <None Include="Shaders\vertex1.vs" />
+    <None Include="Shaders\vertex20250515.vs" />
+    <None Include="Shaders\vertex20250513.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\brick.png" />
+    <Image Include="Images\huaji.png" />
+    <Image Include="Images\huaji1.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
