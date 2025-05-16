@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
+    <ClCompile Include="main20250516.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="main20250512.cpp" />
@@ -156,10 +157,12 @@
     <None Include="Shaders\fragment.fs" />
     <None Include="Shaders\fragment20250515.fs" />
     <None Include="Shaders\fragment20250513.fs" />
+    <None Include="Shaders\fragment20250516.fs" />
     <None Include="Shaders\vertex.vs" />
     <None Include="Shaders\vertex1.vs" />
     <None Include="Shaders\vertex20250515.vs" />
     <None Include="Shaders\vertex20250513.vs" />
+    <None Include="Shaders\vertex20250516.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png" />
