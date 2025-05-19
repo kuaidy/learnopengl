@@ -6,8 +6,93 @@
 #include <GLFW/glfw3.h>
 #include "shader.h"
 #include "stb_image.h"
+#include "camera.h"
 
-int main() {
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+
+void processInput20250518(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE)==GLFW_PRESS) {
+		glfwSetWindowShouldClose(window,true);
+	}
+	float cameraSpeed = 0.5f*deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		cameraPos -= glm::normalize(glm::cross(cameraFront,cameraUp))*cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		cameraPos += glm::normalize(glm::cross(cameraFront,cameraUp))*cameraSpeed;
+	}
+}
+
+
+//鼠标上一帧的位置，初始位置为中心点
+float lastX = 400, lastY = 300;
+bool firstMouse = true;
+//夹角
+float pitch = 0.0f, yam = 0.0f;
+
+/// <summary>
+/// 鼠标回调事件
+/// </summary>
+void mouse_callback(GLFWwindow* window,double xpos,double ypos) {
+	if (firstMouse) {
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	//灵敏度
+	float sensitivity = 0.05f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yam += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	if (pitch < -89.0f) {
+		pitch = -89.0f;
+	}
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yam))*cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yam))*cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+}
+//缩放
+float fov = 1.0f;
+//鼠标滚轮函数
+void sroll_callback(GLFWwindow* window,double xoffset,double yoffset) {
+	if (fov >= 1.0f && fov <= 45.0f) {
+		fov -= yoffset;
+	}
+	if (fov <= 1.0f) {
+		fov = 1.0f;
+	}
+	if (fov >= 45.0f) {
+		fov = 45.0f;
+	}
+}
+
+int main20250516() {
 	//平移
 	//glm::vec4 vec(1.0f,0.0f,0.0f,1.0f);
 	//glm0.9.9版本以上，需要把矩阵初始化为单位矩阵
@@ -144,9 +229,9 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//加载并生成纹理
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("./Images/huaji.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("./Images/xiaoba.jpg", &width, &height, &nrChannels, 0);
 	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
@@ -163,9 +248,9 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//png是4通道的颜色rgba，需要修改顶点数组多加一个数据，着色器对应修改
-	data = stbi_load("./Images/huaji1.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("./Images/wusaqi.jpg", &width, &height, &nrChannels, 0);
 	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
@@ -178,7 +263,7 @@ int main() {
 	Shader ourShader("./Shaders/vertex20250516.vs", "./Shaders/fragment20250516.fs");
 	ourShader.use();
 	ourShader.setFloat("texture1", 1);
-	ourShader.setFloat("opacity", 0.5);
+	ourShader.setFloat("opacity", 1);
 
 	//3d
 	glm::mat4 model = glm::mat4(1.0f);
@@ -194,8 +279,19 @@ int main() {
 	ourShader.setMat4("view", view);
 	ourShader.setMat4("projection", projection);
 
+	//隐藏鼠标
+	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	//注册鼠标回调函数
+	glfwSetCursorPosCallback(window, mouse_callback);
+	//注册鼠标滚轮函数
+	glfwSetScrollCallback(window, sroll_callback);
+
+	Camera camera(cameraPos, cameraUp);
+
 	while (!glfwWindowShouldClose(window))
 	{
+		processInput20250518(window);
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -208,6 +304,29 @@ int main() {
 		/*model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 		ourShader.setMat4("model", model);*/
 		glBindVertexArray(VAO);
+
+		//摄像机位置变换
+		/*float radius = 15.0f;
+		float camX = sin(glfwGetTime())*radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f));
+		ourShader.setMat4("view", view);*/
+
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		//view = glm::lookAt(cameraPos,cameraPos+cameraFront,cameraUp);
+		//ourShader.setMat4("view", view);
+		
+		//view = camera.GetViewMatrix();
+		view = camera.GetMyViewMatrix(cameraPos, glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+		//view = camera.calculate_lookAt_matrix(cameraPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ourShader.setMat4("view", view);
+
+		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+		ourShader.setMat4("projection",projection);
+
 		for (int i = 0; i < 10; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);

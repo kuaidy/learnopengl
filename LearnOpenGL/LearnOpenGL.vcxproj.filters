@@ -42,12 +42,21 @@
     <ClCompile Include="main20250516.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main20250519.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -61,6 +70,9 @@
     <None Include="Shaders\vertex20250515.vs" />
     <None Include="Shaders\fragment20250516.fs" />
     <None Include="Shaders\vertex20250516.vs" />
+    <None Include="Shaders\fragment20250519.fs" />
+    <None Include="Shaders\vertex20250519.vs" />
+    <None Include="Shaders\lightfragment.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">
@@ -70,6 +82,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Images\huaji1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\jiyi.jpeg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\wusaqi.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\xiaoba.jpg">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

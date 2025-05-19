@@ -139,9 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
     <ClCompile Include="main20250516.cpp" />
+    <ClCompile Include="main20250519.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="main20250512.cpp" />
@@ -150,6 +152,7 @@
     <ClCompile Include="main20250515.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
@@ -158,16 +161,22 @@
     <None Include="Shaders\fragment20250515.fs" />
     <None Include="Shaders\fragment20250513.fs" />
     <None Include="Shaders\fragment20250516.fs" />
+    <None Include="Shaders\fragment20250519.fs" />
+    <None Include="Shaders\lightfragment.fs" />
     <None Include="Shaders\vertex.vs" />
     <None Include="Shaders\vertex1.vs" />
     <None Include="Shaders\vertex20250515.vs" />
     <None Include="Shaders\vertex20250513.vs" />
     <None Include="Shaders\vertex20250516.vs" />
+    <None Include="Shaders\vertex20250519.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png" />
     <Image Include="Images\huaji.png" />
     <Image Include="Images\huaji1.png" />
+    <Image Include="Images\jiyi.jpeg" />
+    <Image Include="Images\wusaqi.jpg" />
+    <Image Include="Images\xiaoba.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
