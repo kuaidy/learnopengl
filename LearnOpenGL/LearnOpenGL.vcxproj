@@ -162,6 +162,7 @@
     <None Include="Shaders\fragment20250513.fs" />
     <None Include="Shaders\fragment20250516.fs" />
     <None Include="Shaders\fragment20250519.fs" />
+    <None Include="Shaders\fragment20250520.fs" />
     <None Include="Shaders\lightfragment.fs" />
     <None Include="Shaders\vertex.vs" />
     <None Include="Shaders\vertex1.vs" />
@@ -169,6 +170,9 @@
     <None Include="Shaders\vertex20250513.vs" />
     <None Include="Shaders\vertex20250516.vs" />
     <None Include="Shaders\vertex20250519.vs" />
+    <None Include="Shaders\20250520-1.fs" />
+    <None Include="Shaders\20250520-1.vs" />
+    <None Include="Shaders\vertex20250520.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png" />

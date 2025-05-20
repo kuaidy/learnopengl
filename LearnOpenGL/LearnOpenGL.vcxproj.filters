@@ -73,6 +73,10 @@
     <None Include="Shaders\fragment20250519.fs" />
     <None Include="Shaders\vertex20250519.vs" />
     <None Include="Shaders\lightfragment.fs" />
+    <None Include="Shaders\fragment20250520.fs" />
+    <None Include="Shaders\vertex20250520.vs" />
+    <None Include="Shaders\20250520-1.fs" />
+    <None Include="Shaders\20250520-1.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">
