@@ -8,7 +8,7 @@
 #include "stb_image.h"
 #include "camera.h"
 
-int main() {
+int main20250519() {
 	//平移
 	//glm::vec4 vec(1.0f,0.0f,0.0f,1.0f);
 	//glm0.9.9版本以上，需要把矩阵初始化为单位矩阵
@@ -178,9 +178,6 @@ int main() {
 
 	//材质
 	Shader objShader("./Shaders/20250520-1.vs", "./Shaders/20250520-1.fs");
-
-
-
 	Shader lightShader("./Shaders/20250520-1.vs", "./Shaders/lightfragment.fs");
 	Camera camera(viewPos);
 
@@ -234,6 +231,7 @@ int main() {
 
 		lightShader.use();
 		lightShader.setVec3("lightPos", lightPos);
+		lightShader.setVec3("lightColor",lightColor);
 
 		glm::mat4 lightModel = glm::mat4(1.0f);
 		/*lightPos.x = sin(glfwGetTime()) * 2.0f;

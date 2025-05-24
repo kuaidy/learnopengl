@@ -73,6 +73,9 @@ void Shader::del()
 {
 	glDeleteProgram(Id);
 }
+void Shader::setInt(const std::string &name,int value) const {
+	glUniform1i(glGetUniformLocation(Id,name.c_str()),value);
+}
 //uniform…Ë÷√
 void Shader::setFloat(const std::string& name, float value) const {
 	glUniform1f(glGetUniformLocation(Id, name.c_str()), value);
@@ -83,6 +86,7 @@ void Shader::setVec3(const std::string& name, float x, float y, float z) {
 void Shader::setVec3(const std::string &name,glm::vec3 value) {
 	glUniform3f(glGetUniformLocation(Id, name.c_str()),value[0],value[1],value[2]);
 }
+
 
 /// <summary>
 /// æÿ’Û
