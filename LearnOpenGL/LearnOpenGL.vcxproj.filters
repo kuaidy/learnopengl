@@ -51,6 +51,9 @@
     <ClCompile Include="20250521.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="20250527.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -82,6 +85,10 @@
     <None Include="Shaders\20250520-1.vs" />
     <None Include="Shaders\20250521.vs" />
     <None Include="Shaders\20250521.fs" />
+    <None Include="Shaders\20250527.fs" />
+    <None Include="Shaders\20250527.vs" />
+    <None Include="Shaders\20250527-1.fs" />
+    <None Include="Shaders\20250527-1.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">
