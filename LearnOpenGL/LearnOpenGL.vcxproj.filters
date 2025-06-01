@@ -54,6 +54,15 @@
     <ClCompile Include="20250527.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="20250601.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -63,6 +72,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,6 +104,8 @@
     <None Include="Shaders\20250527.vs" />
     <None Include="Shaders\20250527-1.fs" />
     <None Include="Shaders\20250527-1.vs" />
+    <None Include="Shaders\20250601.fs" />
+    <None Include="Shaders\20250601.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">

@@ -8,7 +8,7 @@
 #include "stb_image.h"
 #include "camera.h"
 
-int main20250527() {
+int main20250521() {
 	if (!glfwInit()) {
 		std::cerr << "init failed" << std::endl;
 		return -1;

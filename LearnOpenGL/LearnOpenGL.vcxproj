@@ -108,13 +108,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\glad\include;C:\MyProject\LearnOpenGL\packages\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\glad\include;C:\MyProject\LearnOpenGL\packages\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3;C:\MyProject\LearnOpenGL\packages\glfw\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,11 +141,14 @@
   <ItemGroup>
     <ClCompile Include="20250521.cpp" />
     <ClCompile Include="20250527.cpp" />
+    <ClCompile Include="20250601.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
     <ClCompile Include="main20250516.cpp" />
     <ClCompile Include="main20250519.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="main20250512.cpp" />
@@ -155,6 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
@@ -165,6 +170,8 @@
     <None Include="Shaders\20250527-1.vs" />
     <None Include="Shaders\20250527.fs" />
     <None Include="Shaders\20250527.vs" />
+    <None Include="Shaders\20250601.fs" />
+    <None Include="Shaders\20250601.vs" />
     <None Include="Shaders\fragment.fs" />
     <None Include="Shaders\fragment20250515.fs" />
     <None Include="Shaders\fragment20250513.fs" />
