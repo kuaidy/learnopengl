@@ -142,6 +142,8 @@
     <ClCompile Include="20250521.cpp" />
     <ClCompile Include="20250527.cpp" />
     <ClCompile Include="20250601.cpp" />
+    <ClCompile Include="20250602-1.cpp" />
+    <ClCompile Include="20250602.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
@@ -172,6 +174,10 @@
     <None Include="Shaders\20250527.vs" />
     <None Include="Shaders\20250601.fs" />
     <None Include="Shaders\20250601.vs" />
+    <None Include="Shaders\20250602-1.fs" />
+    <None Include="Shaders\20250602-1.vs" />
+    <None Include="Shaders\20250602.fs" />
+    <None Include="Shaders\20250602.vs" />
     <None Include="Shaders\fragment.fs" />
     <None Include="Shaders\fragment20250515.fs" />
     <None Include="Shaders\fragment20250513.fs" />
@@ -179,6 +185,7 @@
     <None Include="Shaders\fragment20250519.fs" />
     <None Include="Shaders\fragment20250520.fs" />
     <None Include="Shaders\lightfragment.fs" />
+    <None Include="Shaders\shadersinglecolor.fs" />
     <None Include="Shaders\vertex.vs" />
     <None Include="Shaders\vertex1.vs" />
     <None Include="Shaders\vertex20250515.vs" />
@@ -190,12 +197,15 @@
     <None Include="Shaders\vertex20250520.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Images\blending_transparent_window.png" />
     <Image Include="Images\brick.png" />
     <Image Include="Images\container2.png" />
     <Image Include="Images\container2_specular.png" />
+    <Image Include="Images\grass.png" />
     <Image Include="Images\huaji.png" />
     <Image Include="Images\huaji1.png" />
     <Image Include="Images\jiyi.jpeg" />
+    <Image Include="Images\marble.jpg" />
     <Image Include="Images\matrix.jpg" />
     <Image Include="Images\wusaqi.jpg" />
     <Image Include="Images\xiaoba.jpg" />

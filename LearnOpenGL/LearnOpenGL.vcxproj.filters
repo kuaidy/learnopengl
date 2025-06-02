@@ -63,6 +63,12 @@
     <ClCompile Include="model.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="20250602.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="20250602-1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -106,6 +112,11 @@
     <None Include="Shaders\20250527-1.vs" />
     <None Include="Shaders\20250601.fs" />
     <None Include="Shaders\20250601.vs" />
+    <None Include="Shaders\20250602.fs" />
+    <None Include="Shaders\20250602.vs" />
+    <None Include="Shaders\shadersinglecolor.fs" />
+    <None Include="Shaders\20250602-1.fs" />
+    <None Include="Shaders\20250602-1.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">
@@ -133,6 +144,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Images\matrix.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\grass.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\marble.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Images\blending_transparent_window.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

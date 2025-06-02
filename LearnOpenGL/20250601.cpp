@@ -30,7 +30,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 //float deltaTime = 0.0f;
 //float lastFrame = 0.0f;
 
-int main()
+int main20250601()
 {
     // glfw: initialize and configure
     // ------------------------------
