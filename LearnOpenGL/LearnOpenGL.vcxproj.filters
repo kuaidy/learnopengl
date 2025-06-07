@@ -69,6 +69,9 @@
     <ClCompile Include="20250602-1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="20250607.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">

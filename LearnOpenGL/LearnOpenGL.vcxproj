@@ -109,6 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\glad\include;C:\MyProject\LearnOpenGL\packages\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +145,7 @@
     <ClCompile Include="20250601.cpp" />
     <ClCompile Include="20250602-1.cpp" />
     <ClCompile Include="20250602.cpp" />
+    <ClCompile Include="20250607.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
