@@ -20,7 +20,7 @@ struct  Generator
 		std::suspend_always initial_suspend() { return {}; }
 		std::suspend_always final_suspend() noexcept { return {}; }
 		void return_void() {}
-		void unhandled_exception() { std::exit(1); }
+		void unhandled_exception() { }
 	};
 
 	handle_type coro;
@@ -37,7 +37,7 @@ struct  Generator
 	}
 };
 
-int main() {
+int main20250607() {
 
 	return 0;
 }

@@ -45,7 +45,7 @@ unsigned int loadTexture(char const* path) {
 }
 
 
-int main20250602-1() {
+int main20250602_1() {
 	if (!glfwInit()) {
 		std::cerr << "init failed" << std::endl;
 		return -1;

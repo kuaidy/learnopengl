@@ -146,6 +146,7 @@
     <ClCompile Include="20250602-1.cpp" />
     <ClCompile Include="20250602.cpp" />
     <ClCompile Include="20250607.cpp" />
+    <ClCompile Include="20250608.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main20250513.cpp" />
