@@ -3,6 +3,7 @@
 #include <iostream>
 #include <functional>
 #include <cstring>
+#include <future>
 
 using namespace std;
 std::mutex _mutex;
@@ -94,11 +95,26 @@ private:
 	char* data;
 };
 
+
+int async_function() {
+	return 42;
+}
+
 int main() {
-	MyClass obj1("Hello");
-	MyClass obj2 = obj1;
-	obj2.printData();
-	obj1.printData();
+	std::future<int> res = std::async(std::launch::async, async_function);
+	std::cout << res.get() << std::endl;
+
+	//string 的 sso
+	//std::string str1 = "hello world";
+	//std::string str2 = "hello world hello world hello world hello world hello world hello world hello world";
+
+	//std::cout << "address of short str:" << static_cast<const void*>(str1.data()) << std::endl;
+	//std::cout << "address of long str:" << static_cast<const void*>(str2.data()) << std::endl;
+	//拷贝构造函数
+	//MyClass obj1("Hello");
+	//MyClass obj2 = obj1;
+	//obj2.printData();
+	//obj1.printData();
 
 	//大端，小端转换
 	//uint32_t num = 0x12345678;
