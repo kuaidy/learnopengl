@@ -123,6 +123,7 @@
     <None Include="Shaders\shadersinglecolor.fs" />
     <None Include="Shaders\20250602-1.fs" />
     <None Include="Shaders\20250602-1.vs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\brick.png">

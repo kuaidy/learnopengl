@@ -4,8 +4,13 @@
 #include <functional>
 #include <cstring>
 #include <future>
+#include <queue>
+#include <coroutine>
+#include <boost/context/continuation.hpp>
 
 using namespace std;
+using namespace boost::context;
+
 std::mutex _mutex;
 
 void ThreadFunc() {
@@ -68,7 +73,7 @@ bool IsLittleEndian() {
 
 class MyClass {
 public:
-	MyClass(const char * inputData) {
+	MyClass(const char* inputData) {
 		size_t len = std::strlen(inputData) + 1;
 		data = new char[len];
 		strcpy_s(data, len, inputData);
@@ -85,7 +90,7 @@ public:
 	void printData() {
 		std::cout << data << std::endl;
 	}
-	void setData(const char *setData) {
+	void setData(const char* setData) {
 		delete[] data;  // 释放旧数据
 		size_t len = std::strlen(setData) + 1;
 		data = new char[len];
@@ -100,9 +105,171 @@ int async_function() {
 	return 42;
 }
 
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;
+
+void fun1() {
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait(lock, [] {return ready; });//等待条件成立
+	std::cout << "fun1继续执行" << std::endl;
+}
+void fun2() {
+	std::lock_guard<std::mutex> lock(mtx);
+	ready = true;
+	cv.notify_one();//随机唤醒一个线程干活，cv.notify_all();唤醒所有等待线程干活
+}
+
+
+//线程池的实现
+class ThreadPool {
+public:
+	ThreadPool(int threadCount) {
+		for (int i = 0; i < threadCount; ++i) {
+			threads.emplace_back(&ThreadPool::worker, this);
+		}
+	}
+	~ThreadPool() {
+		stop.store(true);
+		condition.notify_all();
+		for (auto& tmpthread : threads) {
+			if (tmpthread.joinable()) {
+				tmpthread.join();
+			}
+		}
+	}
+	/// <summary>
+	/// 提交任务
+	/// </summary>
+	/// <param name="task"></param>
+	void enqueue(std::function<void()> task) {
+		std::unique_lock<std::mutex> lock(queueMutex);
+		tasks.push(std::move(task));
+		condition.notify_one();
+	}
+private:
+	//工作线程函数
+	void worker()
+	{
+		while (true)
+		{
+			std::function<void()> task;
+			{
+				std::unique_lock<std::mutex> lock(queueMutex);
+				condition.wait(lock, [this]() {return stop.load() || !tasks.empty(); });
+				if (stop.load() && tasks.empty()) {
+					return;
+				}
+				task = std::move(tasks.front());
+				tasks.pop();
+			}
+			task();
+		}
+	}
+	/// <summary>
+	/// 线程管理
+	/// </summary>
+	std::vector<std::thread> threads;
+	std::queue<std::function<void()>> tasks;
+	/// <summary>
+	/// 任务队列互斥锁
+	/// </summary>
+	std::mutex queueMutex;
+	/// <summary>
+	/// 任务通知
+	/// </summary>
+	std::condition_variable condition;
+	/// <summary>
+	/// 停止标志
+	/// </summary>
+	std::atomic<bool> stop;
+};
+
+struct MyTask {
+	struct promise_type {
+		std::coroutine_handle<promise_type> handle;
+		MyTask get_return_object() {
+			handle = std::coroutine_handle<promise_type>::from_promise(*this);
+			return MyTask{ handle };
+		}
+		//不挂起，立即执行
+		std::suspend_never initial_suspend() {
+			return {};
+		}
+		/// <summary>
+		/// 不挂起，立即执行，不报异常
+		/// </summary>
+		/// <returns></returns>
+		std::suspend_always final_suspend() noexcept{
+			return {};
+		}
+		void return_void(){}
+		void unhandled_exception(){}
+	};
+	std::coroutine_handle<promise_type> handle;
+	MyTask(std::coroutine_handle<promise_type> h) :handle(h) {
+
+	}
+	~MyTask() {
+		if (handle)
+			handle.destroy();
+	}
+	void resume() {
+		if (!handle.done()) {
+			handle.resume();
+		}
+	}
+};
+MyTask myCoroutine() {
+	std::cout << "hello" << std::endl;
+	co_await std::suspend_always{};
+	std::cout << "world" << std::endl;
+}
+
+//有栈协程
+continuation coro_func(continuation &&c) {
+	std::cout << "start" << std::endl;
+	//挂起等待恢复
+	c = c.resume();
+	std::cout << "coroutine resumed" << std::endl;
+	//再次挂起
+	c = c.resume();
+	std::cout << "coroutine finished" << std::endl;
+	//返回控制权
+	return std::move(c);
+}
+
+
 int main() {
-	std::future<int> res = std::async(std::launch::async, async_function);
-	std::cout << res.get() << std::endl;
+	//使用boost协程
+	continuation coro = callcc(coro_func);
+	std::cout << "back in main" << std::endl;
+	coro = coro.resume();
+	std::cout << "back in main" << std::endl;
+	coro = coro.resume();
+	std::cout << "back in main" << std::endl;
+	////协程
+	//auto t = myCoroutine();
+	//std::cout << "协程暂停中" << std::endl;
+	//t.resume();
+	////线程池
+	//ThreadPool pool(5);
+	//for (int i = 0; i < 10; ++i) {
+	//	pool.enqueue([i]() {
+	//		std::cout << "task " << i << " is running in thread " << std::this_thread::get_id() << std::endl;
+	//		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	//		});
+	//}
+
+
+	/*fun2();
+	fun1();*/
+
+	//条件变量和锁
+
+
+	//std::future<int> res = std::async(std::launch::async, async_function);
+	//std::cout << res.get() << std::endl;
 
 	//string 的 sso
 	//std::string str1 = "hello world";
