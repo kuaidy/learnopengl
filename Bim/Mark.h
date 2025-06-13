@@ -9,8 +9,10 @@
 class Mark {
 public:
 	Mark();
-	void DrawLine(QPoint x, QPoint y);
+	~Mark();
+	//void DrawLine(QPoint x, QPoint y);
 
 private:
 	QOpenGLFunctions_4_5_Core* m_QOpenGLFunctions;
+	QOpenGLShaderProgram* m_Shader;
 };

@@ -110,7 +110,7 @@
     <ClCompile Include="stb_image.cpp" />
     <QtRcc Include="Bim.qrc" />
     <QtUic Include="Bim.ui" />
-    <QtMoc Include="Bim.h" />
+    <QtMoc Include="Bim.h"></QtMoc>
     <ClCompile Include="Bim.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

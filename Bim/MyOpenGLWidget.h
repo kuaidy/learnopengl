@@ -6,6 +6,7 @@
 #include <QOpenGLBuffer>
 #include <string>
 #include <QOpenGLVersionFunctionsFactory>
+#include <QMouseEvent>
 #include "Model.h"
 #include "Mesh.h"
 
@@ -18,15 +19,18 @@ protected:
      void initializeGL() override;
      void resizeGL(int w, int h) override;
      void paintGL() override;
+     void mousePressEvent(QMouseEvent* event) override;
 private:
     Model* m_Model;
-    
-    QOpenGLShaderProgram* m_program;
+    QOpenGLShaderProgram* m_Shader;
+    QOpenGLShaderProgram* m_CubeShader;
     std::vector<Vertex> m_vertices;
     std::vector<GLuint> m_indices;
     QOpenGLBuffer m_vbo;
     QOpenGLBuffer m_ebo;
     GLuint m_vao;
-    
+    vector<QVector3D> m_Points;
+
+    QVector3D ScreenToWorld(int x,int y);
 };
 

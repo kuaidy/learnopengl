@@ -36,8 +36,8 @@ void Mesh::Draw(QOpenGLShaderProgram &shader) {
     // draw mesh
     m_QOpengGlFunction->glBindVertexArray(VAO);
     m_QOpengGlFunction->glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    //m_QOpengGlFunction->glDrawArrays(GL_TRIANGLES,0,vertices.size());
     m_QOpengGlFunction->glBindVertexArray(0);
-    
     m_QOpengGlFunction->glActiveTexture(GL_TEXTURE0);
 
 }

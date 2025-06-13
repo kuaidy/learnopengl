@@ -240,7 +240,7 @@ continuation coro_func(continuation &&c) {
 }
 
 
-int main() {
+int main20250608() {
 	//使用boost协程
 	continuation coro = callcc(coro_func);
 	std::cout << "back in main" << std::endl;

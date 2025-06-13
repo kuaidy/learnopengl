@@ -8,9 +8,17 @@
 #include <iostream>
 #include <stb_image.h>
 #include <chrono>
+#include <QVector3D>
 
 using namespace std;
 using namespace std::chrono;
+
+
+class BindingBox {
+public:
+	QVector3D Min;
+	QVector3D Max;
+};
 
 class Model
 {
@@ -54,11 +62,15 @@ public:
 	/// 绘制模型
 	/// </summary>
 	void Draw(QOpenGLShaderProgram &shader);
+	/// <summary>
+	/// 显示包围盒
+	/// </summary>
+	void ShowBindingBox(int viewWidth,int viewHeight, QOpenGLShaderProgram &shader, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 projection);
 
+	BindingBox m_BindingBox;
 private:
 	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
 	vector<Mesh> m_Meshes;
 	string m_TextureDir;
 	vector<Texture> m_LoadedTextures;
 };
-

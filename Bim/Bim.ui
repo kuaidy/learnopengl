@@ -64,7 +64,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action"/>
+   <addaction name="loadmodel"/>
+   <addaction name="showmodel"/>
+   <addaction name="linemark"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="btnopenfile">
@@ -72,10 +74,17 @@
     <string>open</string>
    </property>
   </action>
-  <action name="action">
-   <property name="icon">
-    <iconset theme="accessories-dictionary"/>
+  <action name="loadmodel">
+   <property name="text">
+    <string>模型加载</string>
    </property>
+  </action>
+  <action name="showmodel">
+   <property name="text">
+    <string>模型显影</string>
+   </property>
+  </action>
+  <action name="linemark">
    <property name="text">
     <string>直线标注</string>
    </property>
