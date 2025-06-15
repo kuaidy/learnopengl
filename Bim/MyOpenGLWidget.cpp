@@ -76,6 +76,7 @@ void MyOpenGLWidget::paintGL() {
 	model.scale(QVector3D(1.0f, 1.0f, 1.0f));
 	//model.rotate(45.0, QVector3D(1.0f, 0.0f, 0.0f));
 	model.rotate(45.0, QVector3D(0.0f, 1.0f, 0.0f));
+	m_MatrixModel = model;
 	m_Shader->setUniformValue("model", model);
 
 	////观察举证
@@ -84,22 +85,42 @@ void MyOpenGLWidget::paintGL() {
 	QVector3D up(0.0f, 1.0f, 0.0f);
 	QMatrix4x4 view;
 	view.lookAt(cameraPos, cameraTarget, up);
+	m_MatrixView = view;
 	m_Shader->setUniformValue("view", view);
 
 	////投影矩阵
 	QMatrix4x4 projection;
 	projection.perspective(45.0, (float)this->width() / (float)this->height(), 0.1, 100.0);
+	m_MatrixProjection = projection;
 	m_Shader->setUniformValue("projection", projection);
+
+	//是否选中，选中则高亮
+	m_Shader->setUniformValue("isSelected", m_IsSelected);
 
 	m_Model->Draw(*m_Shader);
 	m_Shader->release();
 
-	m_Model->ShowBindingBox(this->width(), this->height(), *m_CubeShader, model, view, projection);
+	//m_Model->ShowBindingBox(this->width(), this->height(), *m_CubeShader, m_MatrixModel, m_MatrixView, m_MatrixProjection);
 };
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 	QVector3D p = ScreenToWorld(event->pos().x(), event->pos().y());
 	m_Points.push_back(p);
+
+	//获取点击的射线
+	QVector3D cameraPos(0.0f, 0.0f, 3.0f);
+	QVector3D rayDir = ScreenPosToRayDir(event->pos().x(),event->pos().y());
+	
+	QMatrix4x4 invModel = m_MatrixModel.inverted();
+	QVector3D localOrigin = invModel.map(cameraPos);
+	QVector3D localDir = (invModel.map(cameraPos + rayDir) - localOrigin).normalized();
+	float tMin, tMax;
+	if (RayIntersectsAABB(localOrigin,localDir,m_Model->m_BindingBox.Min,m_Model->m_BindingBox.Max, tMin,tMax)) {
+		m_IsSelected = true;
+	}
+	else {
+		m_IsSelected = false;
+	}
 	update();
 }
 
@@ -133,4 +154,50 @@ QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
 	//	2.0f * winz - 1.0f, 1.0f);
 	//worldPos /= worldPos.w();
 	//return worldPos.toVector3D();
+}
+
+/// <summary>
+/// 判断鼠标点击是否与模型的包围盒相交
+/// </summary>
+/// <returns></returns>
+bool MyOpenGLWidget::RayIntersectsAABB(const QVector3D& rayOrigin,
+	const QVector3D& rayDir,
+	const QVector3D& boxMin,
+	const QVector3D& boxMax,
+	float& tmin,
+	float& tmax) {
+	tmin = -std::numeric_limits<float>::infinity();
+	tmax = std::numeric_limits<float>::infinity();
+
+	for (int i = 0; i < 3; ++i) {
+		float invD = 1.0 / rayDir[i];
+		float t0 = (boxMin[i] - rayOrigin[i]) * invD;
+		float t1 = (boxMax[i] - rayOrigin[i]) * invD;
+		if (invD < 0.0f) std::swap(t0, t1);
+		tmin = std::max(tmin, t0);
+		tmax = std::min(tmax, t1);
+		if (tmax < tmin) {
+			return false;
+		}
+	}
+	return true;
+}
+/// <summary>
+/// 射线
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <returns></returns>
+QVector3D MyOpenGLWidget::ScreenPosToRayDir(int x, int y) {
+	float ndcX = (2.0f * x) / width() - 1.0f;
+	float ndcY = 1.0f - (2.0f * y) / height();
+	QVector4D rayClip(ndcX,ndcY,-1.0,1.0);
+
+	QMatrix4x4 invProjView = (m_MatrixProjection * m_MatrixView).inverted();
+	QVector4D rayWorld = invProjView * rayClip;
+	rayWorld /= rayWorld.w();
+
+	QVector3D cameraPos = m_MatrixView.inverted().column(3).toVector3D();
+	QVector3D dir = (rayWorld.toVector3D() - cameraPos).normalized();
+	return dir;
 }
