@@ -5,19 +5,19 @@
 #include <Model.h>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget* parent) :QOpenGLWidget(parent), m_Shader(nullptr) {
-
 }
 MyOpenGLWidget::~MyOpenGLWidget()
 {
 	delete m_Shader;
-	delete m_CubeShader;
 	delete m_Model;
+	delete m_Mark;
 }
 
 void MyOpenGLWidget::initializeGL() {
 	//初始化
 	initializeOpenGLFunctions();
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	// 启用混合,用来让包围盒透明
 	glEnable(GL_BLEND);
 	// 设置混合函数
@@ -33,127 +33,117 @@ void MyOpenGLWidget::initializeGL() {
 	if (!m_Shader->link()) {
 		qDebug() << "Shader program link error:" << m_Shader->log();
 	}
-
-
-	m_CubeShader = new QOpenGLShaderProgram(this);
-	if (!m_CubeShader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./Shaders/MarkVertexShader.glsl")) {
-		qDebug() << "Vertex shader error:" << m_CubeShader->log();
-	}
-	if (!m_CubeShader->addShaderFromSourceFile(QOpenGLShader::Fragment, "./Shaders/MarkFragmentShader.glsl")) {
-		qDebug() << "Fragment shader error:" << m_CubeShader->log();
-	}
-	if (!m_CubeShader->link()) {
-		qDebug() << "Shader program link error:" << m_CubeShader->log();
-	}
-
-
 	auto func = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_4_5_Core>(QOpenGLContext::currentContext());
 	m_Model = new Model(func);
 	m_Model->LoadFile("C:/MyProject/LearnOpenGL/Resources/labixiaoxin/62b01271ee64be39728ffda6d1a6f53a.obj");
 	//m_Model->LoadFile("C:/MyProject/LearnOpenGL/x64/Debug/Resources/backpack/backpack.obj");
 
-	//m_program = new QOpenGLShaderProgram(this);
-	//if (!m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, "./Shaders/MarkVertexShader.glsl")) {
-	//	qDebug() << "Vertex shader error:" << m_program->log();
-	//}
-	//if (!m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, "./Shaders/MarkFragmentShader.glsl")) {
-	//	qDebug() << "Fragment shader error:" << m_program->log();
-	//}
-	//if (!m_program->link()) {
-	//	qDebug() << "Shader program link error:" << m_program->log();
-	//}
-
+	m_Mark = new Mark(func);
 };
 void MyOpenGLWidget::resizeGL(int w, int h) {
 	glViewport(0, 0, w, h);
 };
 void MyOpenGLWidget::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_Shader->bind();
-	//模型矩阵
-	QMatrix4x4 model;
-	model.translate(QVector3D(0.0f, 0.0f, 0.0f));
-	model.scale(QVector3D(1.0f, 1.0f, 1.0f));
-	//model.rotate(45.0, QVector3D(1.0f, 0.0f, 0.0f));
-	model.rotate(45.0, QVector3D(0.0f, 1.0f, 0.0f));
-	m_MatrixModel = model;
-	m_Shader->setUniformValue("model", model);
 
-	////观察举证
-	QVector3D cameraPos(0.0f, 0.0f, 3.0f);
-	QVector3D cameraTarget(0.0f, 0.0f, 0.0f);
-	QVector3D up(0.0f, 1.0f, 0.0f);
-	QMatrix4x4 view;
-	view.lookAt(cameraPos, cameraTarget, up);
-	m_MatrixView = view;
-	m_Shader->setUniformValue("view", view);
+	if (m_Model->IsShow) {
+		m_Shader->bind();
+		//模型矩阵
+		QMatrix4x4 model;
+		model.translate(QVector3D(0.0f, 1.0f, 0.0f));
+		model.scale(QVector3D(1.0f, 1.0f, 1.0f));
+		//model.rotate(45.0, QVector3D(1.0f, 0.0f, 0.0f));
+		model.rotate(45.0, QVector3D(0.0f, 1.0f, 0.0f));
+		m_MatrixModel = model;
+		m_Shader->setUniformValue("model", model);
 
-	////投影矩阵
-	QMatrix4x4 projection;
-	projection.perspective(45.0, (float)this->width() / (float)this->height(), 0.1, 100.0);
-	m_MatrixProjection = projection;
-	m_Shader->setUniformValue("projection", projection);
+		QMatrix4x4 view;
+		////观察举证
+		if (m_Model->IsSelected) {
+			QVector3D modelCenter = (m_Model->BindingBox.Min + m_Model->BindingBox.Max) / 2;
+			modelCenter = model.map(modelCenter);
+			float radius = (m_Model->BindingBox.Max - m_Model->BindingBox.Min).length() * 0.5f;
+			float distance = radius / std::tan(qDegreesToRadians(45.0f * 0.5f));
+			distance *= 1.5f; // 适当拉远一点，防止模型太满
+			QVector3D cameraDir = QVector3D(0, 0, 1);
+			QVector3D cameraPos = modelCenter + cameraDir * distance;
+			QVector3D up(0.0f, 1.0f, 0.0f);
+			view.lookAt(cameraPos, modelCenter, up);
+			m_MatrixView = view;
+			m_Shader->setUniformValue("view", view);
+		}
+		else {
+			QVector3D cameraPos(0.0f, 0.0f, 3.0f);
+			QVector3D cameraTarget(0.0f, 0.0f, 0.0f);
+			QVector3D up(0.0f, 1.0f, 0.0f);
+			view.lookAt(cameraPos, cameraTarget, up);
+			m_MatrixView = view;
+			m_Shader->setUniformValue("view", view);
+		}
 
-	//是否选中，选中则高亮
-	m_Shader->setUniformValue("isSelected", m_IsSelected);
+		////投影矩阵
+		QMatrix4x4 projection;
+		projection.perspective(45.0, (float)this->width() / (float)this->height(), 0.1, 100.0);
+		m_MatrixProjection = projection;
+		m_Shader->setUniformValue("projection", projection);
 
-	m_Model->Draw(*m_Shader);
-	m_Shader->release();
+		//是否选中，选中则高亮
+		m_Shader->setUniformValue("isSelected", m_Model->IsSelected);
 
+		m_Model->Draw(*m_Shader);
+		m_Shader->release();
+		//绘制标注线
+		m_Mark->DrawLine(width(), height(), model, view, projection);
+	}
 	//m_Model->ShowBindingBox(this->width(), this->height(), *m_CubeShader, m_MatrixModel, m_MatrixView, m_MatrixProjection);
+	m_Mark->DrawTxt("this is sample text", 25, 25, 1.0f, { 1.0f, 0.1f, 0.1f },width(),height());
 };
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 	QVector3D p = ScreenToWorld(event->pos().x(), event->pos().y());
-	m_Points.push_back(p);
+	m_Mark->LinePoints.push_back(p);
 
 	//获取点击的射线
 	QVector3D cameraPos(0.0f, 0.0f, 3.0f);
-	QVector3D rayDir = ScreenPosToRayDir(event->pos().x(),event->pos().y());
-	
+	QVector3D rayDir = ScreenPosToRayDir(event->pos().x(), event->pos().y());
+
 	QMatrix4x4 invModel = m_MatrixModel.inverted();
 	QVector3D localOrigin = invModel.map(cameraPos);
 	QVector3D localDir = (invModel.map(cameraPos + rayDir) - localOrigin).normalized();
 	float tMin, tMax;
-	if (RayIntersectsAABB(localOrigin,localDir,m_Model->m_BindingBox.Min,m_Model->m_BindingBox.Max, tMin,tMax)) {
-		m_IsSelected = true;
+	if (RayIntersectsAABB(localOrigin, localDir, m_Model->BindingBox.Min, m_Model->BindingBox.Max, tMin, tMax)) {
+		m_Model->IsSelected = true;
 	}
 	else {
-		m_IsSelected = false;
+		m_Model->IsSelected = false;
 	}
 	update();
 }
 
 
 QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
-	QVector4D ndc(((2.0f * x) / width() - 1.0f), 1.0f - (2.0f * y) / height(), 0.0f * 2.0f - 1.0f, 1.0f);
-	QMatrix4x4 projection, view;
-	projection.perspective(45.0f, float(this->width()) / height(), 0.1f, 100.0f);
-	view.lookAt(QVector3D(0.0, 0.0, -3.0), QVector3D(0.0, 0.0, 0.0), { 0,1,0 });
-	QMatrix4x4 inv = (projection * view).inverted();
-	QVector4D worldPos = inv * ndc;
-	return worldPos.toVector3DAffine();
-	// 
-	//int viewport[4];
-	////opengl 视口，标准设备坐标，x,y,width,height
-	//glGetIntegerv(GL_VIEWPORT, viewport);
-	//float winx = x;
-	//float winy = viewport[3] - y;//opengl 和 屏幕 y 是相反的
-	//float winz;
+	float ndcX = (2.0f * x) / width() - 1.0f;
+	float ndcY = 1.0f - (2.0f * y) / height();
 
-	//glReadPixels(x, winy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winz);
-	//if (winz == 1.0f) winz = 0.99f;
+	QVector4D nearPoint(ndcX, ndcY, -1.0f, 1.0f);
+	QVector4D farPoint(ndcX, ndcY, 1.0f, 1.0f);
 
-	//QMatrix4x4 projection, view;
-	//projection.perspective(45.0f, float(this->width()) / height(), 0.1f, 100.0f);
-	//view.lookAt(QVector3D(0.0, 0.0, -3.0), QVector3D(0.0, 0.0, 0.0), { 0,1,0 });
+	//逆矩阵
+	QMatrix4x4 inv = (m_MatrixProjection * m_MatrixView).inverted();
 
-	//QMatrix4x4 inv = (projection * view).inverted();
-	//QVector4D worldPos = inv * QVector4D((2.0f * winx) / width() - 1.0f,
-	//	1.0f - (2.0f * winy) / height(),
-	//	2.0f * winz - 1.0f, 1.0f);
-	//worldPos /= worldPos.w();
-	//return worldPos.toVector3D();
+	QVector4D worldNear = inv * nearPoint;
+	QVector4D worldFar = inv * farPoint;
+
+	worldNear /= worldNear.w();
+	worldFar /= worldFar.w();
+
+	//构造射线
+	QVector3D rayOrigin = worldNear.toVector3D();
+	QVector3D rayDir = (worldFar - worldNear).toVector3D().normalized();
+
+	float t = -rayOrigin.z() / rayDir.z();
+	QVector3D pointOnPlane = rayOrigin + t * rayDir;
+	return pointOnPlane;
 }
 
 /// <summary>
@@ -191,7 +181,7 @@ bool MyOpenGLWidget::RayIntersectsAABB(const QVector3D& rayOrigin,
 QVector3D MyOpenGLWidget::ScreenPosToRayDir(int x, int y) {
 	float ndcX = (2.0f * x) / width() - 1.0f;
 	float ndcY = 1.0f - (2.0f * y) / height();
-	QVector4D rayClip(ndcX,ndcY,-1.0,1.0);
+	QVector4D rayClip(ndcX, ndcY, -1.0, 1.0);
 
 	QMatrix4x4 invProjView = (m_MatrixProjection * m_MatrixView).inverted();
 	QVector4D rayWorld = invProjView * rayClip;

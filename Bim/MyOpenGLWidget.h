@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include "Model.h"
 #include "Mesh.h"
+#include "Mark.h"
 
 class MyOpenGLWidget:public QOpenGLWidget,protected QOpenGLFunctions_4_5_Core
 {
@@ -43,8 +44,6 @@ private:
     /// </summary>
     QMatrix4x4 m_MatrixProjection;
 
-    bool m_IsSelected=false;
-
     QVector3D ScreenToWorld(int x,int y);
     /// <summary>
     /// 判断鼠标点击是否与模型的包围盒相交
@@ -57,5 +56,7 @@ private:
         float& tmin,
         float& tmax);
     QVector3D ScreenPosToRayDir(int x,int y);
+
+    Mark* m_Mark;
 };
 

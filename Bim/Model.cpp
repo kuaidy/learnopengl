@@ -115,8 +115,8 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		maxPt.setX(std::max(maxPt.x(), mesh->mVertices[i].x));
 		maxPt.setY(std::max(maxPt.y(), mesh->mVertices[i].y));
 		maxPt.setZ(std::max(maxPt.z(), mesh->mVertices[i].z));
-		this->m_BindingBox.Min = minPt;
-		this->m_BindingBox.Max = maxPt;
+		this->BindingBox.Min = minPt;
+		this->BindingBox.Max = maxPt;
 	}
 	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -180,8 +180,8 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	//	maxPt.setX(std::max(maxPt.x(), mesh->mVertices[i].x));
 	//	maxPt.setY(std::max(maxPt.y(), mesh->mVertices[i].y));
 	//	maxPt.setZ(std::max(maxPt.z(), mesh->mVertices[i].z));
-	//	this->m_BindingBox.Min = minPt;
-	//	this->m_BindingBox.Max = maxPt;
+	//	this->BindingBox.Min = minPt;
+	//	this->BindingBox.Max = maxPt;
 	//}
 
 	//vector<unsigned int> indices;
@@ -319,17 +319,23 @@ void Model::Draw(QOpenGLShaderProgram& shader)
 /// <summary>
 /// œ‘ æ∞¸Œß∫–
 /// </summary>
-void Model::ShowBindingBox(int viewWidth, int viewHeight, QOpenGLShaderProgram &shader, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 projection) {
+void Model::ShowBindingBox(
+	int viewWidth, 
+	int viewHeight, 
+	QOpenGLShaderProgram &shader, 
+	QMatrix4x4 model, 
+	QMatrix4x4 view, 
+	QMatrix4x4 projection) {
 	vector<QVector3D> verteies =
 	{
-		{m_BindingBox.Min.x(), m_BindingBox.Min.y(), m_BindingBox.Min.z()},
-		{m_BindingBox.Min.x(), m_BindingBox.Max.y(), m_BindingBox.Min.z()},
-		{m_BindingBox.Min.x(), m_BindingBox.Max.y(), m_BindingBox.Max.z()},
-		{m_BindingBox.Min.x(), m_BindingBox.Min.y(), m_BindingBox.Max.z()},
-		{m_BindingBox.Max.x(), m_BindingBox.Min.y(), m_BindingBox.Min.z()},
-		{m_BindingBox.Max.x(), m_BindingBox.Max.y(), m_BindingBox.Min.z()},
-		{m_BindingBox.Max.x(), m_BindingBox.Max.y(), m_BindingBox.Max.z()},
-		{m_BindingBox.Max.x(), m_BindingBox.Min.y(), m_BindingBox.Max.z()}
+		{BindingBox.Min.x(), BindingBox.Min.y(), BindingBox.Min.z()},
+		{BindingBox.Min.x(), BindingBox.Max.y(), BindingBox.Min.z()},
+		{BindingBox.Min.x(), BindingBox.Max.y(), BindingBox.Max.z()},
+		{BindingBox.Min.x(), BindingBox.Min.y(), BindingBox.Max.z()},
+		{BindingBox.Max.x(), BindingBox.Min.y(), BindingBox.Min.z()},
+		{BindingBox.Max.x(), BindingBox.Max.y(), BindingBox.Min.z()},
+		{BindingBox.Max.x(), BindingBox.Max.y(), BindingBox.Max.z()},
+		{BindingBox.Max.x(), BindingBox.Min.y(), BindingBox.Max.z()}
 	};
 	unsigned int indices[] = {
 		// Front face (z = min.z): 0, 1, 5, 4

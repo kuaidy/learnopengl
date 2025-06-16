@@ -67,7 +67,9 @@ public:
 	/// </summary>
 	void ShowBindingBox(int viewWidth,int viewHeight, QOpenGLShaderProgram &shader, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 projection);
 
-	BindingBox m_BindingBox;
+	BindingBox BindingBox;
+	bool IsSelected = false;
+	bool IsShow = true;
 private:
 	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
 	vector<Mesh> m_Meshes;
