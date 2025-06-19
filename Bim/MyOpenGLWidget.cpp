@@ -96,7 +96,7 @@ void MyOpenGLWidget::paintGL() {
 		m_Mark->DrawLine(width(), height(), model, view, projection);
 	}
 	//m_Model->ShowBindingBox(this->width(), this->height(), *m_CubeShader, m_MatrixModel, m_MatrixView, m_MatrixProjection);
-	m_Mark->DrawTxt("this is sample text", 25, 25, 1.0f, { 1.0f, 0.1f, 0.1f },width(),height());
+	m_Mark->DrawTxt("demo", 25, 25, 1.0f, { 1.0f, 0.1f, 0.1f },width(),height());
 };
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
