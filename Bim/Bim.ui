@@ -46,16 +46,40 @@
      <x>0</x>
      <y>0</y>
      <width>820</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>file</string>
+     <string>文件</string>
     </property>
-    <addaction name="btnopenfile"/>
+    <addaction name="fileopen"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>造型</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>曲面</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>线框</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>标注</string>
+    </property>
    </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+   <addaction name="menu_5"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -64,29 +88,53 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="loadmodel"/>
-   <addaction name="showmodel"/>
-   <addaction name="linemark"/>
+   <addaction name="modelline"/>
+   <addaction name="action"/>
+   <addaction name="action_2"/>
+   <addaction name="action_3"/>
+   <addaction name="action_4"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="btnopenfile">
+  <action name="modelline">
    <property name="text">
-    <string>open</string>
+    <string>直线</string>
    </property>
   </action>
-  <action name="loadmodel">
+  <action name="fileopen">
    <property name="text">
-    <string>模型加载</string>
+    <string>打开文件</string>
    </property>
   </action>
-  <action name="showmodel">
+  <action name="action">
    <property name="text">
-    <string>模型显影</string>
+    <string>拉伸</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="linemark">
+  <action name="action_2">
    <property name="text">
-    <string>直线标注</string>
+    <string>旋转</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>扫掠</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>放样</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

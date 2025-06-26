@@ -11,10 +11,19 @@ class ParametricModeling {
 public:
 	ParametricModeling(QOpenGLFunctions_4_5_Core* qOpenGLFunction);
 	~ParametricModeling();
+
+	/// <summary>
+	/// 曲线控制点
+	/// </summary>
+	std::vector<QVector3D> ControlPoints;
+
 	/// <summary>
 	/// 绘制贝塞尔曲线
 	/// </summary>
-	void BezierCurves(std::vector<QVector3D> controlPoints, int count);
+	void BezierCurves(int count,
+		QMatrix4x4 model,
+		QMatrix4x4 view,
+		QMatrix4x4 projection);
 	/// <summary>
 	/// 计算排列组合
 	/// </summary>
@@ -36,6 +45,21 @@ public:
 	/// <param name="t"></param>
 	/// <returns></returns>
 	QVector3D Decasteljau(const std::vector<QVector3D>& controlPoints, float t);
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="curvePoints"></param>
+	/// <param name="radius"></param>
+	/// <param name="segmentPointsCount"></param>
+	/// <param name="outVertices"></param>
+	/// <param name="outNormals"></param>
+	/// <param name="outIndices"></param>
+	void GenerateCable(const std::vector<QVector3D>& curvePoints,
+		float radius,
+		int segmentPointsCount,
+		QMatrix4x4 model,
+		QMatrix4x4 view,
+		QMatrix4x4 projection);
 private:
 	QOpenGLFunctions_4_5_Core* m_QOpenGLFunction;
 	QOpenGLShaderProgram* m_LineShader;

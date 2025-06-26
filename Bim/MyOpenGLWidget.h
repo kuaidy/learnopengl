@@ -10,18 +10,33 @@
 #include "Model.h"
 #include "Mesh.h"
 #include "Mark.h"
+#include "ParametricModeling.h"
+#include "CommandMode.h"
+#include <ModelLine.h>
 
 class MyOpenGLWidget:public QOpenGLWidget,protected QOpenGLFunctions_4_5_Core
 {
 public:
     explicit MyOpenGLWidget(QWidget* parent = nullptr);
     ~MyOpenGLWidget();
+    CommandMode CommandMode = CommandMode::None;
+    void CreateModelLine();
 protected:
      void initializeGL() override;
      void resizeGL(int w, int h) override;
      void paintGL() override;
      void mousePressEvent(QMouseEvent* event) override;
+     void mouseReleaseEvent(QMouseEvent* event) override;
+     void mouseMoveEvent(QMouseEvent* event) override;
+     void wheelEvent(QWheelEvent* event) override;
+     void keyPressEvent(QKeyEvent* event) override;
+     void keyReleaseEvent(QKeyEvent* event) override;
 private:
+
+	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
+
+	std::shared_ptr<ModelLine> m_ModelLine;
+
     Model* m_Model;
     QOpenGLShaderProgram* m_Shader;
     QOpenGLShaderProgram* m_CubeShader;
@@ -30,6 +45,11 @@ private:
     QOpenGLBuffer m_vbo;
     QOpenGLBuffer m_ebo;
     GLuint m_vao;
+
+    QVector3D m_CameraPos;
+    QVector3D m_CameraTarget;
+    QVector3D m_Up;
+
     vector<QVector3D> m_Points;
     /// <summary>
     /// 模型矩阵
@@ -56,7 +76,24 @@ private:
         float& tmin,
         float& tmax);
     QVector3D ScreenPosToRayDir(int x,int y);
-
+    /// <summary>
+    /// 标注
+    /// </summary>
     Mark* m_Mark;
+    /// <summary>
+    /// 参数化建模
+    /// </summary>
+    ParametricModeling* m_ParametricModeling;
+    /// <summary>
+    /// 缩放
+    /// </summary>
+    void Scale();
+    bool m_IsAltPress=false;
+    bool m_IsRightMousePress=false;
+    QPoint m_RightMousePoint;
+    float m_Distance = 3.0f;
+    float m_Yaw = 0.0f;
+    float m_Pitch = 0.0f;
+   
 };
 

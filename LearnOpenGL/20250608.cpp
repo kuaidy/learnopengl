@@ -240,14 +240,67 @@ continuation coro_func(continuation &&c) {
 }
 
 
-int main20250608() {
+void timer_fun() {
+	while (true)
+	{
+		std::cout << "123" << std::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}
+
+template<typename T>
+typename std::remove_reference<T>&& my_move(T&& t) {
+	return static_cast<typename std::remove_reference<T>::type&&>(t);
+}
+
+class A {
+public:
+	A() {
+		std::cout << "A" << std::endl;
+	}
+	~A() {
+		std::cout << "~A" << std::endl;
+	}
+	void virtual fun() {
+		std::cout << "funa" << std::endl;
+	}
+};
+
+class B :public A {
+public:
+	B() {
+		std::cout << "B" << std::endl;
+	}
+	~B() {
+		std::cout << "~B" << std::endl;
+	}
+	void fun() override {
+		std::cout << "funb" << std::endl;
+	}
+};
+
+
+int main() {
+
+	//多态
+	A* p = new B();
+	B* p1 = new B();
+	p->fun();
+	p1->fun();
+	delete p;
+	delete p1;
+	////简单定时器
+	//std::thread timer(timer_fun);
+	//timer.join();
+	//return 0;
+
 	//使用boost协程
-	continuation coro = callcc(coro_func);
+	/*continuation coro = callcc(coro_func);
 	std::cout << "back in main" << std::endl;
 	coro = coro.resume();
 	std::cout << "back in main" << std::endl;
 	coro = coro.resume();
-	std::cout << "back in main" << std::endl;
+	std::cout << "back in main" << std::endl;*/
 	////协程
 	//auto t = myCoroutine();
 	//std::cout << "协程暂停中" << std::endl;

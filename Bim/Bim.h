@@ -18,10 +18,12 @@ public:
 	Bim(QWidget* parent = nullptr);
 	~Bim();
 	void OpenModule(string path);
-private slots:
-	void on_btnopenfile_clicked();
+
+public slots:
+	void on_fileopen_triggered();
+	void on_modelline_triggered(bool flag);
 private:
 	Ui::BimClass ui;
-	MyOpenGLWidget* myOpenGlWidget;
+	MyOpenGLWidget* m_MyOpenGlWidget;
 };
 
