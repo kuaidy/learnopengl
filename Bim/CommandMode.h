@@ -1,5 +1,7 @@
 #pragma once
 enum class CommandMode {
     None,
-    ModelLine
+    ModelLine,
+    BSpline,
+    Ball
 };

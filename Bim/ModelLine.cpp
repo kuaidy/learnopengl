@@ -19,7 +19,10 @@ ModelLine::	~ModelLine() {
 /// <summary>
 /// b样条曲线，de-door递推算法
 /// </summary>
-void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints) {
+void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints, 
+	QMatrix4x4 model,
+	QMatrix4x4 view,
+	QMatrix4x4 projection) {
 	//控制点数
 	int numControlPoints = controlPoints.size();
 	//阶数
@@ -27,18 +30,44 @@ void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints) {
 	//采样点
 	int curveResolution = 100;
 	//节点向量
-	std::vector<float> knots = GenerateUniformKnots(numControlPoints,3);
+	std::vector<float> knots = GenerateUniformKnots(numControlPoints, 3);
 	//开始节点
 	float start = knots[degree];
 	//结束节点
 	float end = knots[numControlPoints];
 	//曲线采样点
 	std::vector<QVector3D>curvePoints;
-	for (int i = 0; i < curveResolution;i++) {
+	for (int i = 0; i < curveResolution; i++) {
 		float t = start + (end - start) * float(i) / float(curveResolution);
-		QVector3D curvePoint = DeBoor(controlPoints,knots,degree,t);
+		QVector3D curvePoint = DeBoor(controlPoints, knots, degree, t);
 		curvePoints.push_back(curvePoint);
 	}
+	unsigned int VAO, VBO;
+	m_QOpengGlFunction->glGenVertexArrays(1, &VAO);
+	m_QOpengGlFunction->glBindVertexArray(VAO);
+
+	m_QOpengGlFunction->glGenBuffers(1, &VBO);
+	m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	m_QOpengGlFunction->glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * sizeof(QVector3D), curvePoints.data(), GL_STATIC_DRAW);
+
+	m_QOpengGlFunction->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (void*)0);
+	m_QOpengGlFunction->glEnableVertexAttribArray(0);
+
+	m_ModelLineShader->bind();
+
+	//模型矩阵
+	m_ModelLineShader->setUniformValue("model", model);
+
+	//观察矩阵
+	m_ModelLineShader->setUniformValue("view", view);
+
+	//投影矩阵
+	m_ModelLineShader->setUniformValue("projection", projection);
+
+	m_QOpengGlFunction->glBindVertexArray(VAO);
+	m_QOpengGlFunction->glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
+
+	m_ModelLineShader->release();
 }
 /// <summary>
 /// 
@@ -47,7 +76,7 @@ void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints) {
 /// <param name="knots"></param>
 /// <param name="degree"></param>
 /// <param name="t"></param>
-QVector3D DeBoor(const std::vector<QVector3D>& controlPoints, const std::vector<float>& knots, int degree, float t)
+QVector3D ModelLine::DeBoor(const std::vector<QVector3D>& controlPoints, const std::vector<float>& knots, int degree, float t)
 {
 	int n = controlPoints.size();
 	//找到t所在的节点区间
@@ -76,7 +105,7 @@ QVector3D DeBoor(const std::vector<QVector3D>& controlPoints, const std::vector<
 				float denom = knots[knotIdx2] - knots[knotIdx1];
 				if (abs(denom) > 1e-6) {
 					float alpha = (t - knots[knotIdx1]) / denom;
-						//线性插值
+					//线性插值
 					d[j] = (1.0f - alpha) * d[j - 1] + alpha * d[j];
 				}
 			}
@@ -92,9 +121,9 @@ QVector3D DeBoor(const std::vector<QVector3D>& controlPoints, const std::vector<
 /// <param name="degree"></param>
 /// <returns></returns>
 std::vector<float> ModelLine::GenerateUniformKnots(int numControlPoints, int degree) {
-	std::vector<float> knots;
 	int m = numControlPoints + degree + 1;
-	for (int i = 0; i < m;++i) {
+	std::vector<float> knots(m);
+	for (int i = 0; i < m; ++i) {
 		if (i <= degree) {
 			knots[i] = 0.0f;
 		}

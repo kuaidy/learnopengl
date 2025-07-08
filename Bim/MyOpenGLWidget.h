@@ -13,6 +13,8 @@
 #include "ParametricModeling.h"
 #include "CommandMode.h"
 #include <ModelLine.h>
+#include <BasicPrimitives.h>
+#include <Element.h>
 
 class MyOpenGLWidget:public QOpenGLWidget,protected QOpenGLFunctions_4_5_Core
 {
@@ -20,7 +22,9 @@ public:
     explicit MyOpenGLWidget(QWidget* parent = nullptr);
     ~MyOpenGLWidget();
     CommandMode CommandMode = CommandMode::None;
+    std::vector<Element> Elements;
     void CreateModelLine();
+    void InitMesh();
 protected:
      void initializeGL() override;
      void resizeGL(int w, int h) override;
@@ -34,10 +38,10 @@ protected:
 private:
 
 	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
-
 	std::shared_ptr<ModelLine> m_ModelLine;
+    std::shared_ptr<BasicPrimitives>m_BasicPrimitives;
 
-    Model* m_Model;
+    //Model* m_Model;
     QOpenGLShaderProgram* m_Shader;
     QOpenGLShaderProgram* m_CubeShader;
     std::vector<Vertex> m_vertices;
@@ -94,6 +98,6 @@ private:
     float m_Distance = 3.0f;
     float m_Yaw = 0.0f;
     float m_Pitch = 0.0f;
-   
+    bool m_FileLoaded = false;
 };
 

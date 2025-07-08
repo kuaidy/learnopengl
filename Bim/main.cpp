@@ -1,10 +1,10 @@
-#include "Bim.h"
+#include "BimMainWindow.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    Bim window;
+    BimMainWindow window;
     window.show();
     return app.exec();
 }

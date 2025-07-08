@@ -73,14 +73,14 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		vector.x = mesh->mVertices[i].x;
 		vector.y = mesh->mVertices[i].y;
 		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
+		vertex.Position= QVector3D(vector.x, vector.y, vector.z);
 		// normals
 		if (mesh->HasNormals())
 		{
 			vector.x = mesh->mNormals[i].x;
 			vector.y = mesh->mNormals[i].y;
 			vector.z = mesh->mNormals[i].z;
-			vertex.Normal = vector;
+			vertex.Normal = QVector3D(vector.x, vector.y, vector.z);
 		}
 		// texture coordinates
 		if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
@@ -90,7 +90,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
+			vertex.TexCoords = QVector2D(vec.x, vec.y);
 			//// tangent
 			//vector.x = mesh->mTangents[i].x;
 			//vector.y = mesh->mTangents[i].y;
@@ -103,7 +103,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			//vertex.Bitangent = vector;
 		}
 		else
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+			vertex.TexCoords = QVector2D(0,0);
 
 		vertices.push_back(vertex);
 
@@ -149,7 +149,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 	// return a mesh object created from the extracted mesh data
-	return Mesh(m_QOpengGlFunction, vertices, indices, textures);
+	return Mesh();
 
 
 

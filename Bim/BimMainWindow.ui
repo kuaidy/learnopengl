@@ -29,6 +29,16 @@
      </widget>
     </item>
     <item>
+     <widget class="QFrame" name="frameopengl">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeView" name="treeView_2">
       <property name="maximumSize">
        <size>
@@ -89,10 +99,12 @@
     <bool>false</bool>
    </attribute>
    <addaction name="modelline"/>
+   <addaction name="bspline"/>
    <addaction name="action"/>
    <addaction name="action_2"/>
    <addaction name="action_3"/>
    <addaction name="action_4"/>
+   <addaction name="ball"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="modelline">
@@ -132,6 +144,28 @@
   <action name="action_4">
    <property name="text">
     <string>放样</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="bspline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>B样条曲线</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="ball">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>球</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

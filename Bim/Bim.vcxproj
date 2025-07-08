@@ -103,6 +103,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicPrimitives.cpp" />
+    <ClCompile Include="Element.cpp" />
+    <ClCompile Include="FilelLoader.cpp" />
+    <ClCompile Include="FileLoadFactory.cpp" />
+    <ClCompile Include="GltfLoader.cpp" />
+    <ClCompile Include="IfcLoader.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Mark.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -111,15 +117,24 @@
     <ClCompile Include="MyOpenGLWidget.cpp" />
     <ClCompile Include="ParametricModeling.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="stb_image_write.cpp" />
+    <ClCompile Include="tiny_gltf.cpp" />
     <QtRcc Include="Bim.qrc" />
-    <QtUic Include="Bim.ui" />
-    <QtMoc Include="Bim.h">
+    <QtUic Include="BimMainWindow.ui" />
+    <QtMoc Include="BimMainWindow.h">
     </QtMoc>
-    <ClCompile Include="Bim.cpp" />
+    <ClCompile Include="BimMainWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicPrimitives.h" />
     <ClInclude Include="CommandMode.h" />
+    <ClInclude Include="Element.h" />
+    <ClInclude Include="FileLoader.h" />
+    <ClInclude Include="FileLoadFactory.h" />
+    <ClInclude Include="GltfLoader.h" />
+    <ClInclude Include="IfcLoader.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Mark.h" />
     <ClInclude Include="Mesh.h" />
@@ -128,10 +143,13 @@
     <ClInclude Include="MyOpenGLWidget.h" />
     <ClInclude Include="ParametricModeling.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="stb_image_write.h" />
+    <ClInclude Include="tiny_gltf.h" />
     <ClInclude Include="x64\Debug\qt\uic\ui_Bim.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="todo.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

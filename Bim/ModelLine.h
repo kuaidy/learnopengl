@@ -14,7 +14,10 @@ public:
 	/// 通过控制点绘制3阶样条曲线
 	/// </summary>
 	/// <param name="controlPoints"></param>
-	void BSpline(const std::vector<QVector3D>& controlPoints);
+	void BSpline(const std::vector<QVector3D>& controlPoints,
+		QMatrix4x4 model,
+		QMatrix4x4 view,
+		QMatrix4x4 projection);
 	/// <summary>
 	/// deboor 递推算法
 	/// </summary>

@@ -16,7 +16,6 @@ m_Up(0.0f, 1.0f, 0.0f)
 MyOpenGLWidget::~MyOpenGLWidget()
 {
 	delete m_Shader;
-	delete m_Model;
 	delete m_Mark;
 	delete m_ParametricModeling;
 }
@@ -33,8 +32,7 @@ void MyOpenGLWidget::initializeGL() {
 	//禁止背面剔除
 	glDisable(GL_CULL_FACE);
 	// 启用线框模式
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//初始化几个变化矩阵
 	//模型矩阵
 	m_MatrixModel.translate(QVector3D(0.0f, 0.0f, 0.0f));
@@ -62,6 +60,9 @@ void MyOpenGLWidget::initializeGL() {
 	//m_Model->LoadFile("C:/MyProject/LearnOpenGL/x64/Debug/Resources/backpack/backpack.obj");
 	//m_Mark = new Mark(func);
 	//m_ParametricModeling = new ParametricModeling(func);
+	m_ModelLine = std::make_shared<ModelLine>(m_QOpengGlFunction);
+	m_BasicPrimitives = std::make_shared<BasicPrimitives>(m_QOpengGlFunction);
+
 };
 void MyOpenGLWidget::resizeGL(int w, int h) {
 	glViewport(0, 0, w, h);
@@ -71,72 +72,96 @@ void MyOpenGLWidget::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.2, 0.2, 0.2, 1.0);
 
-	if (m_Model->IsShow) {
-		m_Shader->bind();
-		m_Shader->setUniformValue("model", m_MatrixModel);
+	m_Shader->bind();
+	m_Shader->setUniformValue("model", m_MatrixModel);
+	m_Shader->setUniformValue("view", m_MatrixView);
+	m_Shader->setUniformValue("projection", m_MatrixProjection);
 
-		////观察举证
-		if (m_Model->IsSelected) {
-			QMatrix4x4 view;
-			QVector3D modelCenter = (m_Model->BindingBox.Min + m_Model->BindingBox.Max) / 2;
-			modelCenter = m_MatrixModel.map(modelCenter);
-			float radius = (m_Model->BindingBox.Max - m_Model->BindingBox.Min).length() * 0.5f;
-			float distance = radius / std::tan(qDegreesToRadians(45.0f * 0.5f));
-			distance *= 1.5f; // 适当拉远一点，防止模型太满
-			QVector3D cameraDir = QVector3D(0, 0, 1);
-			QVector3D cameraPos = modelCenter + cameraDir * distance;
-			QVector3D up(0.0f, 1.0f, 0.0f);
-			view.lookAt(cameraPos, modelCenter, up);
-			m_Shader->setUniformValue("view", view);
+	if (m_FileLoaded) {
+		for (int i = 0; i < Elements.size(); ++i) {
+			Elements[i].mesh.Draw(*m_Shader);
 		}
-		else {
-			m_Shader->setUniformValue("view", m_MatrixView);
-		}
-		m_Shader->setUniformValue("projection", m_MatrixProjection);
-
-		//是否选中，选中则高亮
-		m_Shader->setUniformValue("isSelected", m_Model->IsSelected);
-
-		m_Model->Draw(*m_Shader);
-		m_Shader->release();
-		//绘制标注线
-		//m_Mark->DrawLine(width(), height(), m_MatrixModel, m_MatrixView, m_MatrixProjection);
-		//绘制贝塞尔曲线
-		//m_ParametricModeling->BezierCurves(100, m_MatrixModel, m_MatrixView, m_MatrixProjection);
 	}
+	m_Shader->release();
+
+	//if (m_Model->IsShow) {
+	//	m_Shader->bind();
+	//	m_Shader->setUniformValue("model", m_MatrixModel);
+
+	//	////观察举证
+	//	if (m_Model->IsSelected) {
+	//		QMatrix4x4 view;
+	//		QVector3D modelCenter = (m_Model->BindingBox.Min + m_Model->BindingBox.Max) / 2;
+	//		modelCenter = m_MatrixModel.map(modelCenter);
+	//		float radius = (m_Model->BindingBox.Max - m_Model->BindingBox.Min).length() * 0.5f;
+	//		float distance = radius / std::tan(qDegreesToRadians(45.0f * 0.5f));
+	//		distance *= 1.5f; // 适当拉远一点，防止模型太满
+	//		QVector3D cameraDir = QVector3D(0, 0, 1);
+	//		QVector3D cameraPos = modelCenter + cameraDir * distance;
+	//		QVector3D up(0.0f, 1.0f, 0.0f);
+	//		view.lookAt(cameraPos, modelCenter, up);
+	//		m_Shader->setUniformValue("view", view);
+	//	}
+	//	else {
+	//		m_Shader->setUniformValue("view", m_MatrixView);
+	//	}
+	//	m_Shader->setUniformValue("projection", m_MatrixProjection);
+
+	//	//是否选中，选中则高亮
+	//	m_Shader->setUniformValue("isSelected", m_Model->IsSelected);
+
+	//	m_Model->Draw(*m_Shader);
+	//	m_Shader->release();
+	//	//绘制标注线
+	//	//m_Mark->DrawLine(width(), height(), m_MatrixModel, m_MatrixView, m_MatrixProjection);
+	//	//绘制贝塞尔曲线
+	//	//m_ParametricModeling->BezierCurves(100, m_MatrixModel, m_MatrixView, m_MatrixProjection);
+	//}
 	//m_Model->ShowBindingBox(this->width(), this->height(), *m_CubeShader, m_MatrixModel, m_MatrixView, m_MatrixProjection);
 	//m_Mark->DrawTxt("demo", 25, 25, 1.0f, { 1.0f, 0.1f, 0.1f }, width(), height());
 
-	if (m_ModelLine != nullptr) {
-		m_ModelLine->Draw();
-	}
+	//if (m_ModelLine != nullptr) {
+	//	m_ModelLine->BSpline(m_ModelLine->Vertices, m_MatrixModel, m_MatrixView, m_MatrixProjection);
+	//}
+
+	//if (m_BasicPrimitives != nullptr) {
+	//	m_BasicPrimitives->Ball();
+	//}
 
 };
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 	QVector3D p = ScreenToWorld(event->pos().x(), event->pos().y());
-	m_Mark->LinePoints.push_back(p);
-	m_ParametricModeling->ControlPoints.push_back(p);
+	//m_Mark->LinePoints.push_back(p);
+	//m_ParametricModeling->ControlPoints.push_back(p);
 
-	//获取点击的射线
+	//获取点击的射线，选中模型
 	QVector3D cameraPos(0.0f, 0.0f, 3.0f);
 	QVector3D rayDir = ScreenPosToRayDir(event->pos().x(), event->pos().y());
-
-	QMatrix4x4 invModel = m_MatrixModel.inverted();
-	QVector3D localOrigin = invModel.map(cameraPos);
-	QVector3D localDir = (invModel.map(cameraPos + rayDir) - localOrigin).normalized();
-	float tMin, tMax;
-	if (RayIntersectsAABB(localOrigin, localDir, m_Model->BindingBox.Min, m_Model->BindingBox.Max, tMin, tMax)) {
-		m_Model->IsSelected = true;
-	}
-	else {
-		m_Model->IsSelected = false;
-	}
+	//QMatrix4x4 invModel = m_MatrixModel.inverted();
+	//QVector3D localOrigin = invModel.map(cameraPos);
+	//QVector3D localDir = (invModel.map(cameraPos + rayDir) - localOrigin).normalized();
+	//float tMin, tMax;
+	//if (RayIntersectsAABB(localOrigin, localDir, m_Model->BindingBox.Min, m_Model->BindingBox.Max, tMin, tMax)) {
+	//	m_Model->IsSelected = true;
+	//}
+	//else {
+	//	m_Model->IsSelected = false;
+	//}
 	//进入视图旋转模式
 	if (event->button() == Qt::RightButton) {
 		m_IsRightMousePress = true;
 		m_RightMousePoint = event->pos();
 	}
+	//绘制b样条曲线
+	if (CommandMode == CommandMode::BSpline && event->button() == Qt::LeftButton) {
+		m_ModelLine->Vertices.push_back(p);
+	}
+	//绘制球
+	if (CommandMode == CommandMode::Ball && event->button() == Qt::LeftButton) {
+		m_BasicPrimitives->offset = p;
+	}
+
 	update();
 }
 
@@ -210,7 +235,6 @@ QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
 	QVector3D pointOnPlane = rayOrigin + t * rayDir;
 	return pointOnPlane;
 }
-
 /// <summary>
 /// 判断鼠标点击是否与模型的包围盒相交
 /// </summary>
@@ -256,8 +280,6 @@ QVector3D MyOpenGLWidget::ScreenPosToRayDir(int x, int y) {
 	QVector3D dir = (rayWorld.toVector3D() - cameraPos).normalized();
 	return dir;
 }
-
-
 void MyOpenGLWidget::wheelEvent(QWheelEvent* event) {
 	float delta = event->angleDelta().y() / 120.0f; // 每次滚轮滚动的增量
 	float zoomFactor = 0.2f;
@@ -273,8 +295,14 @@ void MyOpenGLWidget::wheelEvent(QWheelEvent* event) {
 void MyOpenGLWidget::Scale() {
 
 }
-
-
 void MyOpenGLWidget::CreateModelLine() {
 	m_ModelLine = std::make_shared<ModelLine>(m_QOpengGlFunction);
+}
+
+void MyOpenGLWidget::InitMesh() {
+	for (auto& element : Elements) {
+		element.mesh.m_QOpengGlFunction = m_QOpengGlFunction;
+		element.mesh.SetupMesh();
+		m_FileLoaded = true;
+	}
 }
