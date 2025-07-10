@@ -5,12 +5,18 @@
 #include <string>
 #include <vector>
 #include "element.h"
+#include "scenetree.h"
+#include "ElementProperty.h"
 
 class FileLoader {
 public:
 	FileLoader() = default;
 	~FileLoader() = default;
-	virtual std::vector<Element> Load(const std::string filePath) = 0;
+	virtual bool Load(const std::string filePath) = 0;
+
+	std::vector<Element> elements;
+	SceneTree scene_tree;
+	std::vector<ElementProperty> element_properties;
 };
 
 #endif // !FILELOADER_H

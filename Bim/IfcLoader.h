@@ -6,7 +6,7 @@
 #include <string>
 class IfcLoader : public FileLoader {
 public:
-	std::vector<Element> Load(const std::string filePath) override;
+	bool Load(const std::string filePath) override;
 };
 
 #endif // !IFCLOADER_H

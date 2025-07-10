@@ -36,9 +36,9 @@ void MyOpenGLWidget::initializeGL() {
 	//初始化几个变化矩阵
 	//模型矩阵
 	m_MatrixModel.translate(QVector3D(0.0f, 0.0f, 0.0f));
-	m_MatrixModel.scale(QVector3D(1.0f, 1.0f, 1.0f));
+	//m_MatrixModel.scale(QVector3D(1.0f, 1.0f, 1.0f));
 	//m_MatrixModel.rotate(45.0, QVector3D(1.0f, 0.0f, 0.0f));
-	m_MatrixModel.rotate(45.0, QVector3D(0.0f, 1.0f, 0.0f));
+	//m_MatrixModel.rotate(45.0, QVector3D(0.0f, 1.0f, 0.0f));
 	//观察矩阵
 	m_MatrixView.lookAt(m_CameraPos, m_CameraTarget, m_Up);
 	//投影矩阵

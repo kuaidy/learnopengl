@@ -66,12 +66,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;QtSolutions_PropertyBrowser-headd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClCompile Include="BasicPrimitives.cpp" />
     <ClCompile Include="Element.cpp" />
+    <ClCompile Include="ElementProperty.cpp" />
     <ClCompile Include="FilelLoader.cpp" />
     <ClCompile Include="FileLoadFactory.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
@@ -116,6 +117,7 @@
     <ClCompile Include="ModelLine.cpp" />
     <ClCompile Include="MyOpenGLWidget.cpp" />
     <ClCompile Include="ParametricModeling.cpp" />
+    <ClCompile Include="SceneTree.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="tiny_gltf.cpp" />
@@ -130,6 +132,7 @@
     <ClInclude Include="BasicPrimitives.h" />
     <ClInclude Include="CommandMode.h" />
     <ClInclude Include="Element.h" />
+    <ClInclude Include="ElementProperty.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="FileLoadFactory.h" />
     <ClInclude Include="GltfLoader.h" />
@@ -142,6 +145,7 @@
     <ClInclude Include="ModelLine.h" />
     <ClInclude Include="MyOpenGLWidget.h" />
     <ClInclude Include="ParametricModeling.h" />
+    <ClInclude Include="SceneTree.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="tiny_gltf.h" />

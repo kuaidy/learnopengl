@@ -5,6 +5,7 @@
 class Element {
 public:
 	std::string guid;
+	std::string name;
 	std::string typeName;
 	Bim::Mesh mesh;
 };

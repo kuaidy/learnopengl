@@ -14,6 +14,7 @@ void Mesh::Draw(QOpenGLShaderProgram &shader) {
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
+
     //for (unsigned int i = 0; i < textures.size(); i++)
     //{
     //    m_QOpengGlFunction->glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
@@ -84,14 +85,9 @@ unsigned int Mesh::TextureFromFile(const std::string &filename, bool gamma)
     m_QOpengGlFunction->glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 4);
     if (data)
     {
-        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
         GLenum format;
         if (nrComponents == 1)
             format = GL_RED;
@@ -99,10 +95,20 @@ unsigned int Mesh::TextureFromFile(const std::string &filename, bool gamma)
             format = GL_RGB;
         else if (nrComponents == 4)
             format = GL_RGBA;
+        else {
+            std::cerr << "Unsupported nrComponents: " << nrComponents << std::endl;
+            stbi_image_free(data);
+            return 0;
+        }
 
         m_QOpengGlFunction->glBindTexture(GL_TEXTURE_2D, textureID);
         m_QOpengGlFunction->glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         m_QOpengGlFunction->glGenerateMipmap(GL_TEXTURE_2D);
+
+        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        m_QOpengGlFunction->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
     }

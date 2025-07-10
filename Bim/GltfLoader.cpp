@@ -1,17 +1,16 @@
-#include "GltfLoader.h"
+ï»¿#include "GltfLoader.h"
 #include <Element.h>
 
 /// <summary>
-/// Ä£ĞÍÎÄ¼ş¼ÓÔØ
+/// æ¨¡å‹æ–‡ä»¶åŠ è½½
 /// </summary>
 /// <param name="fileName"></param>
 /// <returns></returns>
-std::vector<Element> GltfLoader::Load(const std::string fileName) {
+bool GltfLoader::Load(const std::string fileName) {
 	Model model;
 	TinyGLTF loader;
 	std::string err;
 	std::string warn;
-	std::vector<Element> elements;
 	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, fileName);
 	if (!warn.empty()) {
 		printf("Warn: %s\n", warn.c_str());
@@ -21,11 +20,12 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 	}
 	if (!ret) {
 		printf("Failed to parse glTF\n");
-		return elements;
+		return false;
 	}
-	//µÃµ½ÎÄ¼ş¼Ğ
+	//å¾—åˆ°æ–‡ä»¶å¤¹
 	std::filesystem::path path(fileName);
 	std::filesystem::path folderPath = path.parent_path();
+	//è·å–æ¨¡å‹æ•°æ®
 	for (int i = 0; i < model.nodes.size(); ++i) {
 		Element element;
 		int meshIndex = model.nodes[i].mesh;
@@ -33,7 +33,7 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 		const tinygltf::Mesh& mesh = model.meshes[meshIndex];
 		for (int j = 0; j < mesh.primitives.size(); ++j) {
 			const tinygltf::Primitive& primitive = mesh.primitives[j];
-			//»ñÈ¡¶¥µãÊı¾İ
+			//è·å–é¡¶ç‚¹æ•°æ®
 			std::vector<glm::vec3> positions;
 			auto itPosition = primitive.attributes.find("POSITION");
 			if (itPosition != primitive.attributes.end()) {
@@ -43,7 +43,7 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 					positions.emplace_back(datas[k], datas[k + 1], datas[k + 2]);
 				}
 			}
-			//·¨ÏßÊı¾İ
+			//æ³•çº¿æ•°æ®
 			std::vector<glm::vec3> normals;
 			auto itNormal = primitive.attributes.find("NORMAL");
 			if (itNormal != primitive.attributes.end()) {
@@ -53,7 +53,7 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 					normals.emplace_back(datas[k], datas[k + 1], datas[k + 2]);
 				}
 			}
-			//TEXCOORD_0 ÎÆÀí×ø±ê
+			//TEXCOORD_0 çº¹ç†åæ ‡
 			std::vector<glm::vec2> uvs;
 			auto itTexcoord = primitive.attributes.find("TEXCOORD_0");
 			if (itTexcoord != primitive.attributes.end()) {
@@ -63,7 +63,7 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 					uvs.emplace_back(datas[k], datas[k + 1]);
 				}
 			}
-			//¹¹Ôì¶¥µãÊı¾İ
+			//æ„é€ é¡¶ç‚¹æ•°æ®
 			for (int k = 0; k < positions.size(); ++k) {
 				Bim::Vertex vertex;
 				vertex.Position = QVector3D(positions[k].x, positions[k].y, positions[k].z);
@@ -75,7 +75,7 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 				}
 				element.mesh.vertices.push_back(vertex);
 			}
-			//¶¥µãË÷Òı
+			//é¡¶ç‚¹ç´¢å¼•
 			if (primitive.indices >= 0) {
 				const tinygltf::Accessor& accessor = model.accessors[primitive.indices];
 				const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
@@ -97,30 +97,82 @@ std::vector<Element> GltfLoader::Load(const std::string fileName) {
 					element.mesh.indices.push_back(index);
 				}
 			}
-			//²ÄÖÊ
+			//æè´¨
 			int materialIndex = primitive.material;
 			if (materialIndex >= 0 && materialIndex < model.materials.size()) {
 				const tinygltf::Material& material = model.materials[materialIndex];
-				// ÏÖÔÚÄã¿ÉÒÔ·ÃÎÊ material µÄ¸÷ÖÖÊôĞÔ
-				const auto& pbr = material.pbrMetallicRoughness;
-				if (pbr.baseColorTexture.index >= 0) {
-					int textureIndex = pbr.baseColorTexture.index;
+				// ç°åœ¨ä½ å¯ä»¥è®¿é—® material çš„å„ç§å±æ€§
+				if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
+					int textureIndex = material.pbrMetallicRoughness.baseColorTexture.index;
 					const tinygltf::Texture& texture = model.textures[textureIndex];
 					int imageIndex = texture.source;
 					const tinygltf::Image& image = model.images[imageIndex];
 					Bim::Texture bimTexture;
-					bimTexture.type = image.mimeType;
+					bimTexture.type = "texture_diffuse";
+					bimTexture.path = folderPath.string() + "/" + image.uri;
+					element.mesh.textures.push_back(bimTexture);
+				}
+				else if (material.normalTexture.index >= 0) {
+					int textureIndex = material.normalTexture.index;
+					const tinygltf::Texture& texture = model.textures[textureIndex];
+					int imageIndex = texture.source;
+					const tinygltf::Image& image = model.images[imageIndex];
+					Bim::Texture bimTexture;
+					bimTexture.type = "texture_normal";
 					bimTexture.path = folderPath.string() + "/" + image.uri;
 					element.mesh.textures.push_back(bimTexture);
 				}
 			}
 		}
 		elements.push_back(element);
+
+		//è·å–å±æ€§
+		//åç§°
+		ElementProperty propertyName;
+		propertyName.node_index = i;
+		propertyName.name = "åç§°";
+		propertyName.value = model.nodes[i].name;
+		element_properties.push_back(propertyName);
+
+		//ä½ç½®
+		if (model.nodes[i].translation.size() == 3) {
+			ElementProperty propertyPostion;
+			propertyPostion.node_index = i;
+			propertyPostion.name = "ä½ç½®";
+			propertyPostion.value = "";
+			element_properties.push_back(propertyPostion);
+
+			ElementProperty propertyPostionX;
+			propertyPostionX.node_index = i;
+			propertyPostionX.name = "x";
+			propertyPostionX.value = std::to_string(model.nodes[i].translation[0]);
+			propertyPostion.children.push_back(propertyPostionX);
+
+			ElementProperty propertyPostionY;
+			propertyPostionY.node_index = i;
+			propertyPostionY.name = "y";
+			propertyPostionY.value = std::to_string(model.nodes[i].translation[1]);
+			propertyPostion.children.push_back(propertyPostionY);
+
+			ElementProperty propertyPostionZ;
+			propertyPostionZ.node_index = i;
+			propertyPostionZ.name = "z";
+			propertyPostionZ.value = std::to_string(model.nodes[i].translation[2]);
+			propertyPostion.children.push_back(propertyPostionZ);
+		}
+
 	}
-	return elements;
+	//è·å–åœºæ™¯æ•°æ®
+	const tinygltf::Scene& scene = model.scenes[
+		model.defaultScene >= 0 ? model.defaultScene : 0
+	];
+	for (int rootNode:scene.nodes) {
+		CreateSceneTree(model, rootNode, scene_tree);
+	}
+	return true;
 }
 /// <summary>
-/// Í¨ÓÃ·½·¨£¬»ñÈ¡Êı¾İ
+/// é€šç”¨æ–¹æ³•ï¼Œè·å–æ•°æ®
 /// </summary>
 /// <param name="model"></param>
 /// <param name="accessor"></param>
@@ -143,4 +195,21 @@ std::vector<float> GltfLoader::GetAttributeData(const tinygltf::Model& model, co
 		}
 	}
 	return result;
+}
+/// <summary>
+/// åˆ›å»ºåœºæ™¯æ ‘
+/// </summary>
+/// <param name="model"></param>
+/// <param name="nodeIndex"></param>
+void GltfLoader::CreateSceneTree(const tinygltf::Model& gltfModel, int nodeIndex, SceneTree& parentSceneTree) {
+	const auto& node = gltfModel.nodes[nodeIndex];
+	SceneTree sceneTree;
+	sceneTree.name = node.name;
+	sceneTree.nodeIndex = nodeIndex;
+	parentSceneTree.children.push_back(sceneTree);
+	// å–å‡ºåˆšåˆš push_back çš„é‚£ä¸€é¡¹çš„å¼•ç”¨
+	SceneTree& current = parentSceneTree.children.back();
+	for (int childIndex : node.children) {
+		CreateSceneTree(gltfModel, childIndex, current);
+	}
 }

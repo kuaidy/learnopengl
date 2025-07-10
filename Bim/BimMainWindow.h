@@ -7,6 +7,9 @@
 #include <assimp/postprocess.h>
 #include <string>
 #include <QFileDialog>
+#include <QStandardItemModel>
+#include <QtVariantPropertyManager>
+
 #include "MyOpenGLWidget.h"
 #include "FileLoadFactory.h"
 
@@ -20,6 +23,7 @@ public:
 	BimMainWindow(QWidget* parent = nullptr);
 	~BimMainWindow();
 	void OpenModule(string path);
+	std::unique_ptr<FileLoader> file_loader;
 
 public slots:
 	void on_fileopen_triggered();
@@ -29,5 +33,9 @@ public slots:
 private:
 	Ui::BimClass ui;
 	MyOpenGLWidget* m_MyOpenGlWidget;
+	QStandardItemModel* tree_model;
+
+	void FillTreeModel(const SceneTree& treeNode, QStandardItem* parentItem);
+	void ShowNodeProperties(const int nodeIndex);
 };
 
