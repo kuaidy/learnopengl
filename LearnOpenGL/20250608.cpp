@@ -120,7 +120,6 @@ void fun2() {
 	cv.notify_one();//随机唤醒一个线程干活，cv.notify_all();唤醒所有等待线程干活
 }
 
-
 //线程池的实现
 class ThreadPool {
 public:
@@ -200,11 +199,11 @@ struct MyTask {
 		/// 不挂起，立即执行，不报异常
 		/// </summary>
 		/// <returns></returns>
-		std::suspend_always final_suspend() noexcept{
+		std::suspend_always final_suspend() noexcept {
 			return {};
 		}
-		void return_void(){}
-		void unhandled_exception(){}
+		void return_void() {}
+		void unhandled_exception() {}
 	};
 	std::coroutine_handle<promise_type> handle;
 	MyTask(std::coroutine_handle<promise_type> h) :handle(h) {
@@ -227,7 +226,7 @@ MyTask myCoroutine() {
 }
 
 //有栈协程
-continuation coro_func(continuation &&c) {
+continuation coro_func(continuation&& c) {
 	std::cout << "start" << std::endl;
 	//挂起等待恢复
 	c = c.resume();
@@ -261,8 +260,11 @@ public:
 	~A() {
 		std::cout << "~A" << std::endl;
 	}
-	void virtual fun() {
+	void fun() {
 		std::cout << "funa" << std::endl;
+	}
+	void virtual fun1() {
+		std::cout << "fun1a" << std::endl;
 	}
 };
 
@@ -274,21 +276,100 @@ public:
 	~B() {
 		std::cout << "~B" << std::endl;
 	}
-	void fun() override {
+	void fun() {
 		std::cout << "funb" << std::endl;
+	}
+	void fun1() override {
+		std::cout << "fun1b" << std::endl;
 	}
 };
 
+class C :public A {
+public:
+	C() {
+		std::cout << "C" << std::endl;
+	}
+	~C() {
+		std::cout << "~C" << std::endl;
+	}
+	void fun() {
+		std::cout << "func" << std::endl;
+	}
+	void fun1() override {
+		std::cout << "fun1c" << std::endl;
+	}
+};
+
+class Test {
+	const int a;
+};
+
+
+
+void worker(std::promise<void> workPromise) {
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	std::cout << "work done" << std::endl;
+	workPromise.set_value();
+}
+
+void worker1(std::function<void()> call_back) {
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	std::cout << "work done" << std::endl;
+	call_back();
+}
+
 
 int main() {
+	//使用回调函数，主线程无需等待？
+	std::thread t1(worker1, []() {
+		std::cout << "end" << std::endl;
+		});
+	t1.join();
+
+
+	////主线程等待的情况
+	//std::promise<void> promise;
+	//std::future<void> future = promise.get_future();
+
+	//std::thread t(worker, std::move(promise));
+
+	//future.wait();
+	//std::cout << "end" << std::endl;
+
+	//t.detach();
 
 	//多态
-	A* p = new B();
-	B* p1 = new B();
-	p->fun();
-	p1->fun();
-	delete p;
-	delete p1;
+	A* pa = new A();
+	A* pb = new B();
+	A* pc = new C();
+	pa->fun();
+	pb->fun();
+	pc->fun();
+
+	pa->fun1();
+	pb->fun1();
+	pc->fun1();
+
+	delete pa;
+	delete pb;
+	delete pc;
+
+	A* p_a = new A();
+	B* p_b = new B();
+	C* p_c = new C();
+	p_a->fun();
+	p_b->fun();
+	p_c->fun();
+
+	p_a->fun1();
+	p_b->fun1();
+	p_c->fun1();
+
+	delete p_a;
+	delete p_b;
+	delete p_c;
+
+
 	////简单定时器
 	//std::thread timer(timer_fun);
 	//timer.join();

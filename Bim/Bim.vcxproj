@@ -116,6 +116,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLine.cpp" />
     <ClCompile Include="MyOpenGLWidget.cpp" />
+    <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="ParametricModeling.cpp" />
     <ClCompile Include="SceneTree.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="FileLoadFactory.h" />
     <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="IfcLoader.h" />
+    <ClInclude Include="Instance.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Mark.h" />
@@ -144,6 +146,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLine.h" />
     <ClInclude Include="MyOpenGLWidget.h" />
+    <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="ParametricModeling.h" />
     <ClInclude Include="SceneTree.h" />
     <ClInclude Include="stb_image.h" />
@@ -153,6 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\Picking.frag" />
+    <None Include="Shaders\Picking.vert" />
+    <None Include="Shaders\test.vert" />
     <None Include="todo.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

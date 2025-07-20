@@ -97,6 +97,9 @@
     <ClCompile Include="SceneTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ObjLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -162,9 +165,18 @@
     <ClInclude Include="SceneTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ObjLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="todo.md" />
+    <None Include="Shaders\Picking.vert" />
+    <None Include="Shaders\test.vert" />
+    <None Include="Shaders\Picking.frag" />
   </ItemGroup>
 </Project>

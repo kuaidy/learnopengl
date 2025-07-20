@@ -4,14 +4,14 @@ BimMainWindow::BimMainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
+	ui.splitter->setStretchFactor(0, 0);
+	ui.splitter->setStretchFactor(1, 1);
+	ui.splitter->setStretchFactor(2, 0);
 	m_MyOpenGlWidget = new MyOpenGLWidget(ui.frameopengl);
 	// 设置布局
 	QVBoxLayout* layout = new QVBoxLayout(ui.frameopengl);
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->addWidget(m_MyOpenGlWidget);
-	// 可选：设置大小策略
-	m_MyOpenGlWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
 }
 
 BimMainWindow::~BimMainWindow()
@@ -29,9 +29,10 @@ void BimMainWindow::on_fileopen_triggered() {
 		"",
 		tr("模型文件(*.gltf *.glb *.obj *.fbx *.stl *.ifc);;所有文件 (*.*)")
 	);
+	if (fileName.isEmpty()) return;
 	file_loader = FileLoadFactory::Create(fileName.toStdString());
 	file_loader->Load(fileName.toStdString());
-	m_MyOpenGlWidget->InitMesh();
+	m_MyOpenGlWidget->file_loader = file_loader;
 
 	tree_model = new QStandardItemModel();
 	tree_model->setHorizontalHeaderLabels(QStringList() << tr("场景"));

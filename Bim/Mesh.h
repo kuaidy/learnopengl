@@ -52,9 +52,9 @@ namespace Bim {
 		void Draw(QOpenGLShaderProgram& shaderProgram);
 		void SetupMesh();
 		QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
-	private:
 		unsigned int VAO;
 		unsigned int VBO, EBO;
+	private:
 		unsigned int TextureFromFile(const std::string& filename, bool gamma);
 	};
 }

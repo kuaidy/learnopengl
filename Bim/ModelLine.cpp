@@ -1,6 +1,6 @@
 #include "ModelLine.h"
 ModelLine::ModelLine(QOpenGLFunctions_4_5_Core* qOpenGLFunction) {
-	m_QOpengGlFunction = qOpenGLFunction;
+	m_QOpenGLFunction = qOpenGLFunction;
 	m_ModelLineShader = new QOpenGLShaderProgram();
 	if (!m_ModelLineShader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./Shaders/LineVertexShader.glsl")) {
 		qDebug() << "Model Line Vertex shader error:" << m_ModelLineShader->log();
@@ -11,9 +11,30 @@ ModelLine::ModelLine(QOpenGLFunctions_4_5_Core* qOpenGLFunction) {
 	if (!m_ModelLineShader->link()) {
 		qDebug() << "Model Line Shader program link error:" << m_ModelLineShader->log();
 	}
+
+	m_QOpenGLFunction->glGenVertexArrays(1, &vao);
+	// 绑定 VAO
+	m_QOpenGLFunction->glBindVertexArray(vao);
+
+	qDebug() << "model line vao:" << vao;
+
+	m_QOpenGLFunction->glGenBuffers(1, &vbo);
+	// 绑定 VBO
+	m_QOpenGLFunction->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//m_QOpenGLFunction->glBufferData(GL_ARRAY_BUFFER, dataSize, dataPtr, GL_DYNAMIC_DRAW);
+
+	// 设置顶点属性
+	m_QOpenGLFunction->glEnableVertexAttribArray(0);
+	m_QOpenGLFunction->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Bim::Vertex), (void*)offsetof(Bim::Vertex, Position));
+
+	// 解绑（重要）
+	m_QOpenGLFunction->glBindBuffer(GL_ARRAY_BUFFER, 0);
+	m_QOpenGLFunction->glBindVertexArray(0);
 }
 ModelLine::	~ModelLine() {
 	delete m_ModelLineShader;
+	m_QOpenGLFunction->glDeleteBuffers(1, &vbo);
+	m_QOpenGLFunction->glDeleteVertexArrays(1, &vao);
 }
 
 /// <summary>
@@ -43,15 +64,15 @@ void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints,
 		curvePoints.push_back(curvePoint);
 	}
 	unsigned int VAO, VBO;
-	m_QOpengGlFunction->glGenVertexArrays(1, &VAO);
-	m_QOpengGlFunction->glBindVertexArray(VAO);
+	m_QOpenGLFunction->glGenVertexArrays(1, &VAO);
+	m_QOpenGLFunction->glBindVertexArray(VAO);
 
-	m_QOpengGlFunction->glGenBuffers(1, &VBO);
-	m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	m_QOpengGlFunction->glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * sizeof(QVector3D), curvePoints.data(), GL_STATIC_DRAW);
+	m_QOpenGLFunction->glGenBuffers(1, &VBO);
+	m_QOpenGLFunction->glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	m_QOpenGLFunction->glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * sizeof(QVector3D), curvePoints.data(), GL_STATIC_DRAW);
 
-	m_QOpengGlFunction->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (void*)0);
-	m_QOpengGlFunction->glEnableVertexAttribArray(0);
+	m_QOpenGLFunction->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QVector3D), (void*)0);
+	m_QOpenGLFunction->glEnableVertexAttribArray(0);
 
 	m_ModelLineShader->bind();
 
@@ -64,8 +85,8 @@ void ModelLine::BSpline(const std::vector<QVector3D>& controlPoints,
 	//投影矩阵
 	m_ModelLineShader->setUniformValue("projection", projection);
 
-	m_QOpengGlFunction->glBindVertexArray(VAO);
-	m_QOpengGlFunction->glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
+	m_QOpenGLFunction->glBindVertexArray(VAO);
+	m_QOpenGLFunction->glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
 
 	m_ModelLineShader->release();
 }
@@ -135,4 +156,32 @@ std::vector<float> ModelLine::GenerateUniformKnots(int numControlPoints, int deg
 		}
 	}
 	return knots;
+}
+/// <summary>
+/// 绘制
+/// </summary>
+void ModelLine::Draw(
+	QMatrix4x4 model,
+	QMatrix4x4 view,
+	QMatrix4x4 projection) {
+
+	if (element.mesh.vertices.size() == 0 ) return;
+	//加上最后一个点
+	vector<Bim::Vertex> tmpVertexes = element.mesh.vertices;
+	tmpVertexes.push_back(last_vertex);
+
+	m_ModelLineShader->bind();
+	//m_ModelLineShader->setUniformValue("model", model);
+	m_ModelLineShader->setUniformValue("view", view);
+	m_ModelLineShader->setUniformValue("projection", projection);
+
+	m_QOpenGLFunction->glBindVertexArray(vao);
+
+	m_QOpenGLFunction->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	m_QOpenGLFunction->glBufferData(GL_ARRAY_BUFFER, tmpVertexes.size() * sizeof(Bim::Vertex), tmpVertexes.data(), GL_STATIC_DRAW);
+	m_QOpenGLFunction->glEnableVertexAttribArray(0);
+	m_QOpenGLFunction->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Bim::Vertex), (void*)offsetof(Bim::Vertex, Position));
+
+	m_QOpenGLFunction->glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)tmpVertexes.size());
+	m_ModelLineShader->release();
 }

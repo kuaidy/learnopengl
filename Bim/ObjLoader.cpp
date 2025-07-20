@@ -1,5 +1,5 @@
 #include "ObjLoader.h"
 
-std::vector<Element> ObjLoader::Load(const std::string fileName) {
-
+bool ObjLoader::Load(const std::string fileName) {
+	return true;
 }

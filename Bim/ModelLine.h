@@ -2,6 +2,7 @@
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLShaderProgram>
 #include <vector>
+#include <Element.h>
 
 using namespace std;
 
@@ -33,9 +34,15 @@ public:
 	/// <param name="degree"></param>
 	/// <returns></returns>
 	std::vector<float> GenerateUniformKnots(int numControlPoints, int degree);
-	std::vector<QVector3D> Vertices;
-	QVector3D LastVertex;
+	void Draw(QMatrix4x4 model,QMatrix4x4 view,QMatrix4x4 projection);
+	Element element;
+	/// <summary>
+	/// 用于实时显示线段
+	/// </summary>
+	Bim::Vertex last_vertex;
 private:
-	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
+	QOpenGLFunctions_4_5_Core* m_QOpenGLFunction;
 	QOpenGLShaderProgram* m_ModelLineShader;
+	unsigned int vao;
+	unsigned int vbo;
 };

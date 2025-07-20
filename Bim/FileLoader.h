@@ -14,9 +14,11 @@ public:
 	~FileLoader() = default;
 	virtual bool Load(const std::string filePath) = 0;
 
+	bool is_loaded = false;
 	std::vector<Element> elements;
 	SceneTree scene_tree;
 	std::vector<ElementProperty> element_properties;
+	std::vector<GPUTriangle> triangles;
 };
 
 #endif // !FILELOADER_H

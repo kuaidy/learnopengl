@@ -23,7 +23,7 @@ public:
 	BimMainWindow(QWidget* parent = nullptr);
 	~BimMainWindow();
 	void OpenModule(string path);
-	std::unique_ptr<FileLoader> file_loader;
+	std::shared_ptr<FileLoader> file_loader;
 
 public slots:
 	void on_fileopen_triggered();

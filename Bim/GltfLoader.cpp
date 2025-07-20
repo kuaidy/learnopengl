@@ -7,30 +7,40 @@
 /// <param name="fileName"></param>
 /// <returns></returns>
 bool GltfLoader::Load(const std::string fileName) {
+
+	//得到文件夹
+	std::filesystem::path path(fileName);
+	std::filesystem::path folderPath = path.parent_path();
+
 	Model model;
 	TinyGLTF loader;
 	std::string err;
 	std::string warn;
-	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, fileName);
+	bool res = false;
+	if (path.extension() == ".glb") {
+		res = loader.LoadBinaryFromFile(&model, &err, &warn, fileName);
+	}
+	else {
+		res = loader.LoadASCIIFromFile(&model, &err, &warn, fileName);
+	}
 	if (!warn.empty()) {
 		printf("Warn: %s\n", warn.c_str());
 	}
 	if (!err.empty()) {
 		printf("Err: %s\n", err.c_str());
 	}
-	if (!ret) {
+	if (!res) {
 		printf("Failed to parse glTF\n");
 		return false;
 	}
-	//得到文件夹
-	std::filesystem::path path(fileName);
-	std::filesystem::path folderPath = path.parent_path();
+
 	//获取模型数据
 	for (int i = 0; i < model.nodes.size(); ++i) {
 		Element element;
 		int meshIndex = model.nodes[i].mesh;
 		if (meshIndex < 0) continue;
 		const tinygltf::Mesh& mesh = model.meshes[meshIndex];
+		element.objectId = i;
 		for (int j = 0; j < mesh.primitives.size(); ++j) {
 			const tinygltf::Primitive& primitive = mesh.primitives[j];
 			//获取顶点数据
@@ -76,6 +86,7 @@ bool GltfLoader::Load(const std::string fileName) {
 				element.mesh.vertices.push_back(vertex);
 			}
 			//顶点索引
+			std::vector<float> indices;
 			if (primitive.indices >= 0) {
 				const tinygltf::Accessor& accessor = model.accessors[primitive.indices];
 				const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
@@ -94,6 +105,7 @@ bool GltfLoader::Load(const std::string fileName) {
 						index = *(reinterpret_cast<const uint32_t*>(dataPtr + k * sizeof(uint32_t)));
 						break;
 					}
+					indices.push_back(index);
 					element.mesh.indices.push_back(index);
 				}
 			}
@@ -122,6 +134,18 @@ bool GltfLoader::Load(const std::string fileName) {
 					bimTexture.path = folderPath.string() + "/" + image.uri;
 					element.mesh.textures.push_back(bimTexture);
 				}
+			}
+			//获取所有的三角面用于模型选中操作
+			for (size_t k = 0; k + 2 < indices.size(); k += 3) {
+				unsigned int i0 = indices[i];
+				unsigned int i1 = indices[i + 1];
+				unsigned int i2 = indices[i + 2];
+				GPUTriangle triangle;
+				triangle.v0 = glm::vec4(positions[3 * i0],1.0);
+				triangle.v1 = glm::vec4(positions[3 * i1],1.0);
+				triangle.v2 = glm::vec4(positions[3 * i2],1.0);
+				triangle.objectId = i;
+				triangles.push_back(triangle);
 			}
 		}
 		elements.push_back(element);
@@ -160,15 +184,15 @@ bool GltfLoader::Load(const std::string fileName) {
 			propertyPostionZ.value = std::to_string(model.nodes[i].translation[2]);
 			propertyPostion.children.push_back(propertyPostionZ);
 		}
-
 	}
 	//获取场景数据
 	const tinygltf::Scene& scene = model.scenes[
 		model.defaultScene >= 0 ? model.defaultScene : 0
 	];
-	for (int rootNode:scene.nodes) {
+	for (int rootNode : scene.nodes) {
 		CreateSceneTree(model, rootNode, scene_tree);
 	}
+	is_loaded = true;
 	return true;
 }
 /// <summary>
