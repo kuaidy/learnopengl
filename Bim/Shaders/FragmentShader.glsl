@@ -11,7 +11,6 @@ uniform vec4 u_clipPlane;
 
 void main()
 {
-
     float distance = dot(vec3(u_clipPlane),fragWorldPos.xyz)+u_clipPlane.w;
     if(distance>0.0){
         discard;

@@ -1,5 +1,6 @@
 #include "BimMainWindow.h"
 #include <QtWidgets/QApplication>
+#include <Commands/CommandManager.h>
 
 int main(int argc, char* argv[])
 {
@@ -13,8 +14,9 @@ int main(int argc, char* argv[])
 //	QFont font("WenQuanYi Micro Hei");
 //#endif
 //	qApp->setFont(font);
-
+	auto commandManager = std::make_shared<CommandManager>();
 	BimMainWindow window;
+	window.command_manager = commandManager;
 	window.show();
 	return app.exec();
 }

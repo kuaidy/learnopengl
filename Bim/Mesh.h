@@ -6,6 +6,7 @@
 #include <QOpenGLShaderProgram>
 #include <stb_image.h>
 #include <iostream>
+#include <Element.h>
 
 #define MAX_BONE_INFLUENCE 4
 
@@ -49,12 +50,13 @@ namespace Bim {
 		vector<Vertex>       vertices;
 		vector<unsigned int> indices;
 		vector<Texture>      textures;
-		void Draw(QOpenGLShaderProgram& shaderProgram);
+		void Draw(QOpenGLShaderProgram& shaderProgram,ElementType type);
 		void SetupMesh();
 		QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
-		unsigned int VAO;
-		unsigned int VBO, EBO;
+		unsigned int vao,vbo,ebo;
 	private:
 		unsigned int TextureFromFile(const std::string& filename, bool gamma);
+		void DrawLine(QOpenGLShaderProgram& shader);
+		void Draw(QOpenGLShaderProgram& shader);
 	};
 }

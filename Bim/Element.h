@@ -8,10 +8,19 @@ class Element {
 public:
 	std::string guid;
 	std::string name;
-	std::string typeName;
+	ElementType type;
 	Bim::Mesh mesh;
 	bool is_selected;
 	int objectId;
+};
+/// <summary>
+/// 构件类型
+/// </summary>
+enum struct ElementType {
+	Point,
+	Line,
+	Surface,
+	Volume
 };
 /// <summary>
 /// 三角面

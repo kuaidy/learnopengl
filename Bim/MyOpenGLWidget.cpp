@@ -4,6 +4,7 @@
 #include <Mark.h>
 #include <Model.h>
 #include <ModelLine.h>
+#include <Commands/CommandMode.h>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget* parent) :QOpenGLWidget(parent),
 m_Shader(nullptr),
@@ -303,25 +304,36 @@ void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 		m_IsRightMousePress = true;
 		m_RightMousePoint = event->pos();
 	}
-	//绘制直线
-	if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
+
+	if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) 
+	{
+		Element element;
+		element.type = "line";
 		Vertex vertex;
 		vertex.Position = p;
-		m_ModelLine->element.mesh.vertices.push_back(vertex);
+		element.mesh.vertices.push_back(vertex);
+		document->elements.push_back(element);
 	}
-	//绘制b样条曲线
-	if (CommandMode == CommandMode::BSpline && event->button() == Qt::LeftButton) {
-		//m_ModelLine->Vertices.push_back(p);
-		if (m_ModelLine) {
-			Vertex vertex;
-			vertex.Position = p;
-			m_ModelLine->element.mesh.vertices.push_back(vertex);
-		}
-	}
-	//绘制球
-	if (CommandMode == CommandMode::Ball && event->button() == Qt::LeftButton) {
-		m_BasicPrimitives->offset = p;
-	}
+
+	////绘制直线
+	//if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
+	//	Vertex vertex;
+	//	vertex.Position = p;
+	//	m_ModelLine->element.mesh.vertices.push_back(vertex);
+	//}
+	////绘制b样条曲线
+	//if (CommandMode == CommandMode::BSpline && event->button() == Qt::LeftButton) {
+	//	//m_ModelLine->Vertices.push_back(p);
+	//	if (m_ModelLine) {
+	//		Vertex vertex;
+	//		vertex.Position = p;
+	//		m_ModelLine->element.mesh.vertices.push_back(vertex);
+	//	}
+	//}
+	////绘制球
+	//if (CommandMode == CommandMode::Ball && event->button() == Qt::LeftButton) {
+	//	m_BasicPrimitives->offset = p;
+	//}
 
 	update();
 }
@@ -354,7 +366,7 @@ void MyOpenGLWidget::mouseMoveEvent(QMouseEvent* event) {
 		m_MatrixView.lookAt(position, m_CameraTarget, m_Up);
 		m_RightMousePoint = event->pos();
 	}
-	if (CommandMode == CommandMode::ModelLine) {
+	if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) {
 		m_ModelLine->last_vertex.Position = ScreenToWorld(event->pos().x(), event->pos().y());
 		qDebug() << m_ModelLine->last_vertex.Position.x() << m_ModelLine->last_vertex.Position.y() << m_ModelLine->last_vertex.Position.z();
 	}
@@ -766,4 +778,11 @@ void MyOpenGLWidget::MarkAngle() {
 
 		}
 	}
+}
+/// <summary>
+/// 面积标注
+/// </summary>
+void MarkArea()
+{
+
 }

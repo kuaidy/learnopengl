@@ -12,6 +12,16 @@ BimMainWindow::BimMainWindow(QWidget* parent)
 	QVBoxLayout* layout = new QVBoxLayout(ui.frameopengl);
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->addWidget(m_MyOpenGlWidget);
+
+
+	QAction* buildAction = new QAction("建模", this);
+	connect(buildAction, &QAction::triggered, this, &BimMainWindow::on_build_triggered);
+	menuBar()->addAction(buildAction);
+
+	QAction* editAction = new QAction("编辑", this);
+	connect(editAction, &QAction::triggered, this, &BimMainWindow::on_menu_edit_triggered);
+	menuBar()->addAction(editAction);
+
 }
 
 BimMainWindow::~BimMainWindow()
@@ -78,6 +88,22 @@ void BimMainWindow::on_ball_triggered(bool flag) {
 	else {
 		m_MyOpenGlWidget->CommandMode = CommandMode::None;
 	}
+}
+
+void BimMainWindow::on_build_triggered() {
+	build_view = new BuildView(this);
+	ui.mainToolBar->clear();
+	ui.mainToolBar->addWidget(build_view);
+}
+
+/// <summary>
+/// 编辑
+/// </summary>
+void BimMainWindow::on_menu_edit_triggered() {
+	edit_view = new EditView(this);
+	edit_view->command_manager = this->command_manager;
+	ui.mainToolBar->clear();
+	ui.mainToolBar->addWidget(edit_view);
 }
 
 /// <summary>

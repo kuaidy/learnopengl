@@ -12,6 +12,8 @@
 
 #include "MyOpenGLWidget.h"
 #include "FileLoadFactory.h"
+#include <ui/EditView.h>
+#include <ui/BuildView.h>
 
 using namespace std;
 
@@ -24,12 +26,14 @@ public:
 	~BimMainWindow();
 	void OpenModule(string path);
 	std::shared_ptr<FileLoader> file_loader;
-
+	std::shared_ptr<CommandManager> command_manager;
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);
 	void on_bspline_triggered(bool flag);
 	void on_ball_triggered(bool flag);
+	void on_menu_edit_triggered();
+	void on_build_triggered();
 private:
 	Ui::BimClass ui;
 	MyOpenGLWidget* m_MyOpenGlWidget;
@@ -37,5 +41,8 @@ private:
 
 	void FillTreeModel(const SceneTree& treeNode, QStandardItem* parentItem);
 	void ShowNodeProperties(const int nodeIndex);
+
+	EditView* edit_view;
+	BuildView* build_view;
 };
 

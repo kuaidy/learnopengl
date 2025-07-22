@@ -103,12 +103,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Commands\CommandManager.cpp" />
+    <ClCompile Include="Commands\AreaMarkCommand.cpp" />
     <ClCompile Include="BasicPrimitives.cpp" />
+    <ClCompile Include="Docment.cpp" />
     <ClCompile Include="Element.cpp" />
     <ClCompile Include="ElementProperty.cpp" />
     <ClCompile Include="FilelLoader.cpp" />
     <ClCompile Include="FileLoadFactory.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
+    <ClCompile Include="Commands\ICommand.cpp" />
     <ClCompile Include="IfcLoader.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Mark.cpp" />
@@ -122,21 +126,30 @@
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="tiny_gltf.cpp" />
+    <ClCompile Include="ui\BuildView.cpp" />
+    <ClCompile Include="ui\EditView.cpp" />
     <QtRcc Include="Bim.qrc" />
     <QtUic Include="BimMainWindow.ui" />
     <QtMoc Include="BimMainWindow.h">
     </QtMoc>
     <ClCompile Include="BimMainWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="ui\BuildView.ui" />
+    <QtUic Include="ui\EditView.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Commands\CommandManager.h" />
+    <ClInclude Include="Commands\AreaMarkCommand.h" />
     <ClInclude Include="BasicPrimitives.h" />
-    <ClInclude Include="CommandMode.h" />
+    <ClInclude Include="Commands\CommandMode.h" />
+    <ClInclude Include="Commands\CommandState.h" />
+    <ClInclude Include="Docment.h" />
     <ClInclude Include="Element.h" />
     <ClInclude Include="ElementProperty.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="FileLoadFactory.h" />
     <ClInclude Include="GltfLoader.h" />
+    <ClInclude Include="Commands\ICommand.h" />
     <ClInclude Include="IfcLoader.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="json.hpp" />
@@ -152,6 +165,8 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="tiny_gltf.h" />
+    <QtMoc Include="ui\EditView.h" />
+    <QtMoc Include="ui\BuildView.h" />
     <ClInclude Include="x64\Debug\qt\uic\ui_Bim.h" />
   </ItemGroup>
   <ItemGroup>

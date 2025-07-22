@@ -6,11 +6,15 @@
 
 using namespace std;
 
-class ModelLine
+class ModelLine :public Element
 {
 public:
 	ModelLine(QOpenGLFunctions_4_5_Core* qOpenGLFunction);
 	~ModelLine();
+	/// <summary>
+	/// 用于实时显示线段
+	/// </summary>
+	Bim::Vertex last_vertex;
 	/// <summary>
 	/// 通过控制点绘制3阶样条曲线
 	/// </summary>
@@ -26,7 +30,7 @@ public:
 	/// <param name="knots">节点向量</param>
 	/// <param name="degree">阶</param>
 	/// <param name="t"></param>
-	QVector3D DeBoor(const std::vector<QVector3D> &controlPoints,const std::vector<float> &knots,int degree,float t);
+	QVector3D DeBoor(const std::vector<QVector3D>& controlPoints, const std::vector<float>& knots, int degree, float t);
 	/// <summary>
 	/// 生成均匀节点向量
 	/// </summary>
@@ -34,12 +38,7 @@ public:
 	/// <param name="degree"></param>
 	/// <returns></returns>
 	std::vector<float> GenerateUniformKnots(int numControlPoints, int degree);
-	void Draw(QMatrix4x4 model,QMatrix4x4 view,QMatrix4x4 projection);
-	Element element;
-	/// <summary>
-	/// 用于实时显示线段
-	/// </summary>
-	Bim::Vertex last_vertex;
+	void Draw(QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 projection);
 private:
 	QOpenGLFunctions_4_5_Core* m_QOpenGLFunction;
 	QOpenGLShaderProgram* m_ModelLineShader;

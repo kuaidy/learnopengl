@@ -11,22 +11,27 @@
 #include "Mesh.h"
 #include "Mark.h"
 #include "ParametricModeling.h"
-#include "CommandMode.h"
 #include <ModelLine.h>
 #include <BasicPrimitives.h>
 #include <Element.h>
 #include "FileLoader.h"
 #include <QPainter>
+#include <Commands/CommandManager.h>
+#include <Commands/CommandState.h>
+#include "Docment.h"
 
 class MyOpenGLWidget :public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
 {
 public:
 	explicit MyOpenGLWidget(QWidget* parent = nullptr);
 	~MyOpenGLWidget();
-	CommandMode CommandMode = CommandMode::None;
 	std::shared_ptr<FileLoader> file_loader;
+	std::shared_ptr<CommandManager> command_manager;
+	std::shared_ptr<Bim::Docment> document;
+
 	void CreateModelLine();
 	void InitMesh();
+
 protected:
 	void initializeGL() override;
 	void resizeGL(int w, int h) override;
@@ -123,5 +128,7 @@ private:
 	void MarkText();
 
 	void MarkAngle();
+
+	void MarkArea();
 };
 

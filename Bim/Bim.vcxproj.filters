@@ -100,6 +100,24 @@
     <ClCompile Include="ObjLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\EditView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\BuildView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\ICommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\AreaMarkCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CommandManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Docment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -129,7 +147,7 @@
     <ClInclude Include="ModelLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CommandMode.h">
+    <ClInclude Include="Commands\CommandMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BasicPrimitives.h">
@@ -171,6 +189,21 @@
     <ClInclude Include="Instance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Commands\ICommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\AreaMarkCommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Docment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -178,5 +211,21 @@
     <None Include="Shaders\Picking.vert" />
     <None Include="Shaders\test.vert" />
     <None Include="Shaders\Picking.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="ui\EditView.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\BuildView.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ui\EditView.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\BuildView.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>
