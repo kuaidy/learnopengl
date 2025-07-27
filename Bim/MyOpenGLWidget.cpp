@@ -184,55 +184,58 @@ void MyOpenGLWidget::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.2, 0.2, 0.2, 1.0);
 
-	if (!mesh_inited && file_loader != nullptr) {
-		InitMesh();
-		ResetCameraToFitModel(file_loader->elements);
-		//UploadTriangleData();
-	}
+	if (command_manager)
+		command_manager->HandleDraw();
 
-	m_Shader->bind();
-	m_Shader->setUniformValue("model", m_MatrixModel);
-	m_Shader->setUniformValue("view", m_MatrixView);
-	m_Shader->setUniformValue("projection", m_MatrixProjection);
-	m_Shader->setUniformValue("is_selected", false);
-	m_Shader->setUniformValue("u_clipPlane", m_ClipPlane);
+	//if (!mesh_inited && file_loader != nullptr) {
+	//	InitMesh();
+	//	ResetCameraToFitModel(file_loader->elements);
+	//	//UploadTriangleData();
+	//}
 
-	if (file_loader != nullptr) {
-		qDebug() << "draw glfw " << file_loader->elements.size();
+	//m_Shader->bind();
+	//m_Shader->setUniformValue("model", m_MatrixModel);
+	//m_Shader->setUniformValue("view", m_MatrixView);
+	//m_Shader->setUniformValue("projection", m_MatrixProjection);
+	//m_Shader->setUniformValue("is_selected", false);
+	//m_Shader->setUniformValue("u_clipPlane", m_ClipPlane);
 
-		for (auto& element : file_loader->elements)
-		{
-			element.mesh.Draw(*m_Shader);
-		}
-	}
-	m_Shader->release();
+	////if (file_loader != nullptr) {
+	////	qDebug() << "draw glfw " << file_loader->elements.size();
+
+	////	for (auto& element : file_loader->elements)
+	////	{
+	////		element.mesh.Draw(*m_Shader);
+	////	}
+	////}
+	//m_Shader->release();
 
 
-	// 2. 绘制选中的模型（稍微向前偏移）
+	//// 2. 绘制选中的模型（稍微向前偏移）
 
-	m_Shader->bind();
-	m_Shader->setUniformValue("model", m_MatrixModel);
-	m_Shader->setUniformValue("view", m_MatrixView);
-	m_Shader->setUniformValue("projection", m_MatrixProjection);
-	m_Shader->setUniformValue("is_selected", true);
+	//m_Shader->bind();
+	//m_Shader->setUniformValue("model", m_MatrixModel);
+	//m_Shader->setUniformValue("view", m_MatrixView);
+	//m_Shader->setUniformValue("projection", m_MatrixProjection);
+	//m_Shader->setUniformValue("is_selected", true);
 
-	if (file_loader != nullptr) {
-		for (auto& element : file_loader->elements) {
-			if (element.objectId == selected_object_id) {
-				element.mesh.Draw(*m_Shader);
-				break;
-			}
-		}
-	}
-	m_Shader->release();
+	////if (file_loader != nullptr) {
+	////	for (auto& element : file_loader->elements) {
+	////		if (element.objectId == selected_object_id) {
+	////			element.mesh.Draw(*m_Shader);
+	////			break;
+	////		}
+	////	}
+	////}
+	//m_Shader->release();
 
-	// 3. 绘制线框（最顶层）
+	//// 3. 绘制线框（最顶层）
 
-	if (m_ModelLine) {
-		m_ModelLine->Draw(m_MatrixModel, m_MatrixView, m_MatrixProjection);
-		MarkText();
-		MarkAngle();
-	}
+	//if (m_ModelLine) {
+	//	m_ModelLine->Draw(m_MatrixModel, m_MatrixView, m_MatrixProjection);
+	//	MarkText();
+	//	MarkAngle();
+	//}
 
 	//if (m_Model->IsShow) {
 	//	m_Shader->bind();
@@ -282,8 +285,8 @@ void MyOpenGLWidget::paintGL() {
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 	//Test();
-	PerformPicking(event->pos());
-	QVector3D p = ScreenToWorld(event->pos().x(), event->pos().y());
+	//PerformPicking(event->pos());
+	//QVector3D p = ScreenToWorld(event->pos().x(), event->pos().y());
 	//m_Mark->LinePoints.push_back(p);
 	//m_ParametricModeling->ControlPoints.push_back(p);
 
@@ -304,16 +307,9 @@ void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 		m_IsRightMousePress = true;
 		m_RightMousePoint = event->pos();
 	}
-
-	if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) 
-	{
-		Element element;
-		element.type = "line";
-		Vertex vertex;
-		vertex.Position = p;
-		element.mesh.vertices.push_back(vertex);
-		document->elements.push_back(element);
-	}
+	//执行命令
+	if (command_manager)
+		command_manager->HandleMousePress(event);
 
 	////绘制直线
 	//if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
@@ -345,10 +341,10 @@ void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 		m_RightMousePoint = event->pos();
 	}
 
-	if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
-		//绘制模型线
-		//m_ModelLine->Vertices.push_back(ScreenToWorld(event->pos().x(), event->pos().y()));
-	}
+	//if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
+	//	//绘制模型线
+	//	//m_ModelLine->Vertices.push_back(ScreenToWorld(event->pos().x(), event->pos().y()));
+	//}
 }
 
 void MyOpenGLWidget::mouseMoveEvent(QMouseEvent* event) {
@@ -366,10 +362,10 @@ void MyOpenGLWidget::mouseMoveEvent(QMouseEvent* event) {
 		m_MatrixView.lookAt(position, m_CameraTarget, m_Up);
 		m_RightMousePoint = event->pos();
 	}
-	if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) {
-		m_ModelLine->last_vertex.Position = ScreenToWorld(event->pos().x(), event->pos().y());
-		qDebug() << m_ModelLine->last_vertex.Position.x() << m_ModelLine->last_vertex.Position.y() << m_ModelLine->last_vertex.Position.z();
-	}
+	//if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) {
+	//	m_ModelLine->last_vertex.Position = ScreenToWorld(event->pos().x(), event->pos().y());
+	//	qDebug() << m_ModelLine->last_vertex.Position.x() << m_ModelLine->last_vertex.Position.y() << m_ModelLine->last_vertex.Position.z();
+	//}
 	update();
 }
 
@@ -385,30 +381,30 @@ void MyOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 		m_IsAltPress = false;
 	}
 }
-QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
-	float ndcX = (2.0f * x) / width() - 1.0f;
-	float ndcY = 1.0f - (2.0f * y) / height();
-
-	QVector4D nearPoint(ndcX, ndcY, -1.0f, 1.0f);
-	QVector4D farPoint(ndcX, ndcY, 1.0f, 1.0f);
-
-	//逆矩阵
-	QMatrix4x4 inv = (m_MatrixProjection * m_MatrixView).inverted();
-
-	QVector4D worldNear = inv * nearPoint;
-	QVector4D worldFar = inv * farPoint;
-
-	worldNear /= worldNear.w();
-	worldFar /= worldFar.w();
-
-	//构造射线
-	QVector3D rayOrigin = worldNear.toVector3D();
-	QVector3D rayDir = (worldFar - worldNear).toVector3D().normalized();
-
-	float t = -rayOrigin.z() / rayDir.z();
-	QVector3D pointOnPlane = rayOrigin + t * rayDir;
-	return pointOnPlane;
-}
+//QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
+//	float ndcX = (2.0f * x) / width() - 1.0f;
+//	float ndcY = 1.0f - (2.0f * y) / height();
+//
+//	QVector4D nearPoint(ndcX, ndcY, -1.0f, 1.0f);
+//	QVector4D farPoint(ndcX, ndcY, 1.0f, 1.0f);
+//
+//	//逆矩阵
+//	QMatrix4x4 inv = (m_MatrixProjection * m_MatrixView).inverted();
+//
+//	QVector4D worldNear = inv * nearPoint;
+//	QVector4D worldFar = inv * farPoint;
+//
+//	worldNear /= worldNear.w();
+//	worldFar /= worldFar.w();
+//
+//	//构造射线
+//	QVector3D rayOrigin = worldNear.toVector3D();
+//	QVector3D rayDir = (worldFar - worldNear).toVector3D().normalized();
+//
+//	float t = -rayOrigin.z() / rayDir.z();
+//	QVector3D pointOnPlane = rayOrigin + t * rayDir;
+//	return pointOnPlane;
+//}
 /// <summary>
 /// 判断鼠标点击是否与模型的包围盒相交
 /// </summary>
@@ -714,70 +710,70 @@ void MyOpenGLWidget::Test() {
 /// 二位文字标注
 /// </summary>
 void MyOpenGLWidget::MarkText() {
-	if (m_ModelLine != nullptr) {
-		if (m_ModelLine->element.mesh.vertices.size() < 2) return;
-		for (int i = 0; i < m_ModelLine->element.mesh.vertices.size() - 1; ++i) {
-			QVector3D p1 = m_ModelLine->element.mesh.vertices[i].Position;
-			QVector3D p2 = m_ModelLine->element.mesh.vertices[i + 1].Position;
-			QVector3D mid = (p1 + p2) / 2.0f;
-			float length = (p2 - p1).length();
-			QMatrix4x4 mvp = m_MatrixProjection * m_MatrixView * m_MatrixModel;
-			QVector4D clipPos = mvp * QVector4D(mid, 1.0);
-			clipPos /= clipPos.w(); // 归一化设备坐标
+	//if (m_ModelLine != nullptr) {
+	//	if (m_ModelLine->element.mesh.vertices.size() < 2) return;
+	//	for (int i = 0; i < m_ModelLine->element.mesh.vertices.size() - 1; ++i) {
+	//		QVector3D p1 = m_ModelLine->element.mesh.vertices[i].Position;
+	//		QVector3D p2 = m_ModelLine->element.mesh.vertices[i + 1].Position;
+	//		QVector3D mid = (p1 + p2) / 2.0f;
+	//		float length = (p2 - p1).length();
+	//		QMatrix4x4 mvp = m_MatrixProjection * m_MatrixView * m_MatrixModel;
+	//		QVector4D clipPos = mvp * QVector4D(mid, 1.0);
+	//		clipPos /= clipPos.w(); // 归一化设备坐标
 
-			// 转为窗口坐标
-			float x = (clipPos.x() * 0.5f + 0.5f) * width();
-			float y = (1.0f - (clipPos.y() * 0.5f + 0.5f)) * height(); // y 轴倒置
+	//		// 转为窗口坐标
+	//		float x = (clipPos.x() * 0.5f + 0.5f) * width();
+	//		float y = (1.0f - (clipPos.y() * 0.5f + 0.5f)) * height(); // y 轴倒置
 
-			QString text = QString::number(length, 'f', 2) + " m";
-			QPainter painter(this);
-			painter.setPen(Qt::white);
-			painter.setFont(QFont("Arial", 12));
-			painter.drawText(QPointF(x, y), text);
-			painter.end();
+	//		QString text = QString::number(length, 'f', 2) + " m";
+	//		QPainter painter(this);
+	//		painter.setPen(Qt::white);
+	//		painter.setFont(QFont("Arial", 12));
+	//		painter.drawText(QPointF(x, y), text);
+	//		painter.end();
 
-		}
-	}
+	//	}
+	//}
 }
 /// <summary>
 /// 角度标注
 /// </summary>
 void MyOpenGLWidget::MarkAngle() {
-	if (m_ModelLine != nullptr) {
-		if (m_ModelLine->element.mesh.vertices.size() < 3) return;
-		for (int i = 0; i < m_ModelLine->element.mesh.vertices.size() - 2; ++i) {
-			QVector3D p1 = m_ModelLine->element.mesh.vertices[i].Position;
-			QVector3D p2 = m_ModelLine->element.mesh.vertices[i + 1].Position;
-			QVector3D p3 = m_ModelLine->element.mesh.vertices[i + 2].Position;
-			QMatrix4x4 mvp = m_MatrixProjection * m_MatrixView * m_MatrixModel;
-			QVector4D clipPos = mvp * QVector4D(p2, 1.0);
-			clipPos /= clipPos.w(); // 归一化设备坐标
+	//if (m_ModelLine != nullptr) {
+	//	if (m_ModelLine->element.mesh.vertices.size() < 3) return;
+	//	for (int i = 0; i < m_ModelLine->element.mesh.vertices.size() - 2; ++i) {
+	//		QVector3D p1 = m_ModelLine->element.mesh.vertices[i].Position;
+	//		QVector3D p2 = m_ModelLine->element.mesh.vertices[i + 1].Position;
+	//		QVector3D p3 = m_ModelLine->element.mesh.vertices[i + 2].Position;
+	//		QMatrix4x4 mvp = m_MatrixProjection * m_MatrixView * m_MatrixModel;
+	//		QVector4D clipPos = mvp * QVector4D(p2, 1.0);
+	//		clipPos /= clipPos.w(); // 归一化设备坐标
 
-			// 转为窗口坐标
-			float x = (clipPos.x() * 0.5f + 0.5f) * width();
-			float y = (1.0f - (clipPos.y() * 0.5f + 0.5f)) * height(); // y 轴倒置
+	//		// 转为窗口坐标
+	//		float x = (clipPos.x() * 0.5f + 0.5f) * width();
+	//		float y = (1.0f - (clipPos.y() * 0.5f + 0.5f)) * height(); // y 轴倒置
 
-			//求角度
-			float dotvalue = QVector3D::dotProduct(p1 - p2, p3 - p2);
-			float len1 = (p1 - p2).length();
-			float len2 = (p3 - p2).length();
-			// 防止除以0
-			if (len1 < 1e-6f || len2 < 1e-6f)
-				return;
-			float cosTheta = dotvalue / (len1 * len2);
-			// 限制在 -1~1 之间，防止数值误差导致 acos 出 NaN
-			cosTheta = qBound(-1.0f, cosTheta, 1.0f);
-			float radians = qAcos(cosTheta); // 返回的是弧度
-			float angle = qRadiansToDegrees(radians); // 转为角度
-			QString text = QString::number(angle, 'f', 2) + QString::fromUtf8("°");
-			QPainter painter(this);
-			painter.setPen(Qt::white);
-			painter.setFont(QFont("Arial", 12));
-			painter.drawText(QPointF(x, y), text);
-			painter.end();
+	//		//求角度
+	//		float dotvalue = QVector3D::dotProduct(p1 - p2, p3 - p2);
+	//		float len1 = (p1 - p2).length();
+	//		float len2 = (p3 - p2).length();
+	//		// 防止除以0
+	//		if (len1 < 1e-6f || len2 < 1e-6f)
+	//			return;
+	//		float cosTheta = dotvalue / (len1 * len2);
+	//		// 限制在 -1~1 之间，防止数值误差导致 acos 出 NaN
+	//		cosTheta = qBound(-1.0f, cosTheta, 1.0f);
+	//		float radians = qAcos(cosTheta); // 返回的是弧度
+	//		float angle = qRadiansToDegrees(radians); // 转为角度
+	//		QString text = QString::number(angle, 'f', 2) + QString::fromUtf8("°");
+	//		QPainter painter(this);
+	//		painter.setPen(Qt::white);
+	//		painter.setFont(QFont("Arial", 12));
+	//		painter.drawText(QPointF(x, y), text);
+	//		painter.end();
 
-		}
-	}
+	//	}
+	//}
 }
 /// <summary>
 /// 面积标注

@@ -4,13 +4,14 @@
 #include "ICommand.h"
 class CommandManager
 {
-    std::stack<std::shared_ptr<ICommand>> undoStack;
-    std::stack<std::shared_ptr<ICommand>> redoStack;
 public:
-    void Do(std::shared_ptr<ICommand> cmd);
-    void Undo();
-    void Redo();
-    enum CommandMode commandMode;
-    enum CommandState commandState;
+    void SetCommand(std::shared_ptr<ICommand> cmd);
+    void ClearCommand();
+    void HandleMousePress(QMouseEvent* e);
+    void HandleMouseMove(QMouseEvent* e);
+    void HandleMouseRelease(QMouseEvent* e);
+    void HandleDraw();
+private:
+    std::shared_ptr<ICommand> m_CurrentCommand = nullptr;
 };
 

@@ -6,12 +6,28 @@
 /// </summary>
 class Element {
 public:
-	std::string guid;
 	std::string name;
 	ElementType type;
 	Bim::Mesh mesh;
 	bool is_selected;
 	int objectId;
+
+	QOpenGLFunctions_4_5_Core* m_QOpenGLFunction;
+	QOpenGLShaderProgram* m_Shader;
+	/// <summary>
+	/// 模型矩阵
+	/// </summary>
+	QMatrix4x4 m_MatrixModel;
+	/// <summary>
+	/// 观察矩阵
+	/// </summary>
+	QMatrix4x4 m_MatrixView;
+	/// <summary>
+	/// 投影矩阵
+	/// </summary>
+	QMatrix4x4 m_MatrixProjection;
+	int width;
+	int height;
 };
 /// <summary>
 /// 构件类型

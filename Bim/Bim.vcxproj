@@ -114,6 +114,8 @@
     <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Commands\ICommand.cpp" />
     <ClCompile Include="IfcLoader.cpp" />
+    <ClCompile Include="Commands\LineCommand.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Mark.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -126,6 +128,7 @@
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="tiny_gltf.cpp" />
+    <ClCompile Include="Commons\Transform.cpp" />
     <ClCompile Include="ui\BuildView.cpp" />
     <ClCompile Include="ui\EditView.cpp" />
     <QtRcc Include="Bim.qrc" />
@@ -153,6 +156,8 @@
     <ClInclude Include="IfcLoader.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="Commands\LineCommand.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Mark.h" />
     <ClInclude Include="Mesh.h" />
@@ -167,6 +172,7 @@
     <ClInclude Include="tiny_gltf.h" />
     <QtMoc Include="ui\EditView.h" />
     <QtMoc Include="ui\BuildView.h" />
+    <ClInclude Include="Commons\Transform.h" />
     <ClInclude Include="x64\Debug\qt\uic\ui_Bim.h" />
   </ItemGroup>
   <ItemGroup>

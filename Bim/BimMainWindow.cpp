@@ -82,16 +82,12 @@ void BimMainWindow::on_bspline_triggered(bool flag) {
 /// </summary>
 /// <param name="flag"></param>
 void BimMainWindow::on_ball_triggered(bool flag) {
-	if (flag) {
-		m_MyOpenGlWidget->CommandMode = CommandMode::Ball;
-	}
-	else {
-		m_MyOpenGlWidget->CommandMode = CommandMode::None;
-	}
+
 }
 
 void BimMainWindow::on_build_triggered() {
 	build_view = new BuildView(this);
+	build_view->command_manager = this->command_manager;
 	ui.mainToolBar->clear();
 	ui.mainToolBar->addWidget(build_view);
 }
