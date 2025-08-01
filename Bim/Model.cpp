@@ -312,9 +312,9 @@ unsigned int Model::TextureFromFile(const char* path, const string& directory)
 /// </summary>
 void Model::Draw(QOpenGLShaderProgram& shader)
 {
-	for (int i = 0; i < m_Meshes.size(); ++i) {
+	/*for (int i = 0; i < m_Meshes.size(); ++i) {
 		m_Meshes[i].Draw(shader);
-	}
+	}*/
 }
 /// <summary>
 /// œ‘ æ∞¸Œß∫–

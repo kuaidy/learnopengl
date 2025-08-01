@@ -6,7 +6,8 @@
 #include <QOpenGLShaderProgram>
 #include <stb_image.h>
 #include <iostream>
-#include <Element.h>
+#include "ElementType.h"
+#include "Commons/RenderContext.h"
 
 #define MAX_BONE_INFLUENCE 4
 
@@ -50,7 +51,7 @@ namespace Bim {
 		vector<Vertex>       vertices;
 		vector<unsigned int> indices;
 		vector<Texture>      textures;
-		void Draw(QOpenGLShaderProgram& shaderProgram,ElementType type);
+		void DrawByType(QOpenGLShaderProgram& shaderProgram,ElementType type);
 		void SetupMesh();
 		QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
 		unsigned int vao,vbo,ebo;

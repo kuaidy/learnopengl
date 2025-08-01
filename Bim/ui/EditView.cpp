@@ -22,9 +22,9 @@ void EditView::on_length_mark_triggered() {
 /// Ãæ»ý±ê×¢
 /// </summary>
 void EditView::on_area_mark_triggered() {
-	auto areaMarkCommand = std::make_shared<AreaMarkCommand>();
-	command_manager->Do(areaMarkCommand);
-	command_manager->commandMode = CommandMode::Line;
-	command_manager->commandState = CommandState::Doing;
+	//auto areaMarkCommand = std::make_shared<AreaMarkCommand>();
+	//command_manager->Do(areaMarkCommand);
+	//command_manager->commandMode = CommandMode::Line;
+	//command_manager->commandState = CommandState::Doing;
 }
 

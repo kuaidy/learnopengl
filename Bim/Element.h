@@ -1,13 +1,14 @@
 #pragma once
 #include <string>
 #include "Mesh.h"
+#include "ElementType.h"
 /// <summary>
 /// 模型
 /// </summary>
 class Element {
 public:
 	std::string name;
-	ElementType type;
+	ElementType elementType;
 	Bim::Mesh mesh;
 	bool is_selected;
 	int objectId;
@@ -29,15 +30,7 @@ public:
 	int width;
 	int height;
 };
-/// <summary>
-/// 构件类型
-/// </summary>
-enum struct ElementType {
-	Point,
-	Line,
-	Surface,
-	Volume
-};
+
 /// <summary>
 /// 三角面
 /// </summary>

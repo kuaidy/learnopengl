@@ -1,13 +1,18 @@
 ﻿#include "BimMainWindow.h"
 
-BimMainWindow::BimMainWindow(QWidget* parent)
-	: QMainWindow(parent)
+BimMainWindow::BimMainWindow(QWidget* parent,
+	std::shared_ptr<CommandManager> commandManager,
+	std::shared_ptr<Document> document)
+	: QMainWindow(parent),
+	m_CommandManager(commandManager),
+	m_Document(document)
 {
 	ui.setupUi(this);
 	ui.splitter->setStretchFactor(0, 0);
 	ui.splitter->setStretchFactor(1, 1);
 	ui.splitter->setStretchFactor(2, 0);
-	m_MyOpenGlWidget = new MyOpenGLWidget(ui.frameopengl);
+
+	m_MyOpenGlWidget = new MyOpenGLWidget(ui.frameopengl, m_CommandManager, m_Document);
 	// 设置布局
 	QVBoxLayout* layout = new QVBoxLayout(ui.frameopengl);
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -57,25 +62,25 @@ void BimMainWindow::on_fileopen_triggered() {
 	FillTreeModel(file_loader->scene_tree, nullptr);
 }
 void BimMainWindow::on_modelline_triggered(bool flag) {
-	if (flag) {
+	/*if (flag) {
 		m_MyOpenGlWidget->CommandMode = CommandMode::ModelLine;
 		m_MyOpenGlWidget->CreateModelLine();
 	}
 	else {
 		m_MyOpenGlWidget->CommandMode = CommandMode::None;
-	}
+	}*/
 }
 /// <summary>
 /// 绘制b样条曲线
 /// </summary>
 /// <param name="flag"></param>
 void BimMainWindow::on_bspline_triggered(bool flag) {
-	if (flag) {
+	/*if (flag) {
 		m_MyOpenGlWidget->CommandMode = CommandMode::BSpline;
 	}
 	else {
 		m_MyOpenGlWidget->CommandMode = CommandMode::None;
-	}
+	}*/
 }
 /// <summary>
 /// 基本图元绘制，球
@@ -86,8 +91,7 @@ void BimMainWindow::on_ball_triggered(bool flag) {
 }
 
 void BimMainWindow::on_build_triggered() {
-	build_view = new BuildView(this);
-	build_view->command_manager = this->command_manager;
+	build_view = new BuildView(this, this->m_CommandManager, this->m_Document);
 	ui.mainToolBar->clear();
 	ui.mainToolBar->addWidget(build_view);
 }
@@ -97,7 +101,7 @@ void BimMainWindow::on_build_triggered() {
 /// </summary>
 void BimMainWindow::on_menu_edit_triggered() {
 	edit_view = new EditView(this);
-	edit_view->command_manager = this->command_manager;
+	edit_view->command_manager = this->m_CommandManager;
 	ui.mainToolBar->clear();
 	ui.mainToolBar->addWidget(edit_view);
 }

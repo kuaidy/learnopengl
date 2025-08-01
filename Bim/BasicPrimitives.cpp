@@ -59,8 +59,8 @@ void BasicPrimitives::TranslateMesh(Mesh& mesh, const QVector3D& offset) {
 }
 
 void BasicPrimitives::Ball() {
-	Mesh mesh = CreateSphereMesh(1);
-	TranslateMesh(mesh, offset);
-	mesh.SetupMesh();
-	mesh.Draw(*m_BasicPrimitivesShader);
+	//Mesh mesh = CreateSphereMesh(1);
+	//TranslateMesh(mesh, offset);
+	//mesh.SetupMesh();
+	//mesh.Draw(*m_BasicPrimitivesShader);
 }

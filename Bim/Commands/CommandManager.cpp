@@ -23,5 +23,10 @@ void CommandManager::HandleMouseRelease(QMouseEvent* e) {
 }
 void CommandManager::HandleDraw() {
 	if (m_CurrentCommand)
-		m_CurrentCommand->Draw();
+		m_CurrentCommand->OnDraw();
+}
+void CommandManager::HandleFinish(std::shared_ptr<Bim::Document> document) {
+	if (m_CurrentCommand)
+		m_CurrentCommand->Finish(document);
+	m_CurrentCommand = nullptr;
 }

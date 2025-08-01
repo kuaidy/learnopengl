@@ -106,7 +106,7 @@
     <ClCompile Include="Commands\CommandManager.cpp" />
     <ClCompile Include="Commands\AreaMarkCommand.cpp" />
     <ClCompile Include="BasicPrimitives.cpp" />
-    <ClCompile Include="Docment.cpp" />
+    <ClCompile Include="Document.cpp" />
     <ClCompile Include="Element.cpp" />
     <ClCompile Include="ElementProperty.cpp" />
     <ClCompile Include="FilelLoader.cpp" />
@@ -124,6 +124,7 @@
     <ClCompile Include="MyOpenGLWidget.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="ParametricModeling.cpp" />
+    <ClCompile Include="Commons\RenderContext.cpp" />
     <ClCompile Include="SceneTree.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
@@ -146,9 +147,10 @@
     <ClInclude Include="BasicPrimitives.h" />
     <ClInclude Include="Commands\CommandMode.h" />
     <ClInclude Include="Commands\CommandState.h" />
-    <ClInclude Include="Docment.h" />
+    <ClInclude Include="Document.h" />
     <ClInclude Include="Element.h" />
     <ClInclude Include="ElementProperty.h" />
+    <ClInclude Include="ElementType.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="FileLoadFactory.h" />
     <ClInclude Include="GltfLoader.h" />
@@ -166,6 +168,7 @@
     <ClInclude Include="MyOpenGLWidget.h" />
     <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="ParametricModeling.h" />
+    <ClInclude Include="Commons\RenderContext.h" />
     <ClInclude Include="SceneTree.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />

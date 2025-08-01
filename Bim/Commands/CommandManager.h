@@ -11,6 +11,7 @@ public:
     void HandleMouseMove(QMouseEvent* e);
     void HandleMouseRelease(QMouseEvent* e);
     void HandleDraw();
+    void HandleFinish(std::shared_ptr<Bim::Document> document);
 private:
     std::shared_ptr<ICommand> m_CurrentCommand = nullptr;
 };

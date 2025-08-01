@@ -14,6 +14,7 @@
 #include "FileLoadFactory.h"
 #include <ui/EditView.h>
 #include <ui/BuildView.h>
+#include "Document.h"
 
 using namespace std;
 
@@ -22,11 +23,14 @@ class BimMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	BimMainWindow(QWidget* parent = nullptr);
+	BimMainWindow(
+		QWidget* parent = nullptr, 
+		std::shared_ptr<CommandManager> commandManager = nullptr, 
+		std::shared_ptr<Document> document=nullptr);
 	~BimMainWindow();
 	void OpenModule(string path);
 	std::shared_ptr<FileLoader> file_loader;
-	std::shared_ptr<CommandManager> command_manager;
+	
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);
@@ -38,11 +42,15 @@ private:
 	Ui::BimClass ui;
 	MyOpenGLWidget* m_MyOpenGlWidget;
 	QStandardItemModel* tree_model;
+	std::shared_ptr<CommandManager> m_CommandManager;
+	std::shared_ptr<Document> m_Document;
 
 	void FillTreeModel(const SceneTree& treeNode, QStandardItem* parentItem);
 	void ShowNodeProperties(const int nodeIndex);
 
 	EditView* edit_view;
 	BuildView* build_view;
+
+
 };
 

@@ -165,9 +165,9 @@ void ModelLine::Draw(
 	QMatrix4x4 view,
 	QMatrix4x4 projection) {
 
-	if (element.mesh.vertices.size() == 0 ) return;
+	if (this->mesh.vertices.size() == 0 ) return;
 	//加上最后一个点
-	vector<Bim::Vertex> tmpVertexes = element.mesh.vertices;
+	vector<Bim::Vertex> tmpVertexes = this->mesh.vertices;
 	tmpVertexes.push_back(last_vertex);
 
 	m_ModelLineShader->bind();

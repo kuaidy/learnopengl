@@ -5,12 +5,20 @@
 #include <Model.h>
 #include <ModelLine.h>
 #include <Commands/CommandMode.h>
+#include "Commons/Transform.h"
+#include <Commons/RenderContext.h>
+#include "Document.h"
 
-MyOpenGLWidget::MyOpenGLWidget(QWidget* parent) :QOpenGLWidget(parent),
-m_Shader(nullptr),
-m_CameraPos(0.0f, 0.0f, 3.0f),
-m_CameraTarget(0.0f, 0.0f, 0.0f),
-m_Up(0.0f, 1.0f, 0.0f)
+MyOpenGLWidget::MyOpenGLWidget(QWidget* parent,
+	std::shared_ptr<CommandManager> commandManager,
+	std::shared_ptr<Document> document)
+	:QOpenGLWidget(parent),
+	m_CommandManager(commandManager),
+	m_Document(document),
+	m_Shader(nullptr),
+	m_CameraPos(0.0f, 0.0f, 3.0f),
+	m_CameraTarget(0.0f, 0.0f, 0.0f),
+	m_Up(0.0f, 1.0f, 0.0f)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setFocusPolicy(Qt::StrongFocus);
@@ -28,6 +36,7 @@ MyOpenGLWidget::~MyOpenGLWidget()
 void MyOpenGLWidget::initializeGL() {
 	//初始化
 	initializeOpenGLFunctions();
+	//glDisable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 	//// 启用混合,用来让包围盒透明
@@ -77,8 +86,12 @@ void MyOpenGLWidget::initializeGL() {
 	}
 
 	m_QOpengGlFunction = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_4_5_Core>(QOpenGLContext::currentContext());
-
-
+	RenderContext::Instance().Initialize(m_QOpengGlFunction,
+		this->width(),
+		this->height(),
+		m_MatrixModel,
+		m_MatrixView,
+		m_MatrixProjection);
 
 	////有法向量的顶点数据
 	//float vertices[] = {
@@ -178,14 +191,20 @@ void MyOpenGLWidget::resizeGL(int w, int h) {
 	//投影矩阵
 	m_MatrixProjection.setToIdentity();
 	m_MatrixProjection.perspective(45.0, (float)w / (float)h, 0.1, 100.0);
+
+	RenderContext::Instance().width = w;
+	RenderContext::Instance().height = h;
 };
 void MyOpenGLWidget::paintGL() {
 	//清除颜色和深度缓冲
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.2, 0.2, 0.2, 1.0);
 
-	if (command_manager)
-		command_manager->HandleDraw();
+	if (m_Document)
+		m_Document->DrawElements();
+
+	if (m_CommandManager)
+		m_CommandManager->HandleDraw();
 
 	//if (!mesh_inited && file_loader != nullptr) {
 	//	InitMesh();
@@ -308,8 +327,8 @@ void MyOpenGLWidget::mousePressEvent(QMouseEvent* event) {
 		m_RightMousePoint = event->pos();
 	}
 	//执行命令
-	if (command_manager)
-		command_manager->HandleMousePress(event);
+	if (m_CommandManager)
+		m_CommandManager->HandleMousePress(event);
 
 	////绘制直线
 	//if (CommandMode == CommandMode::ModelLine && event->button() == Qt::LeftButton) {
@@ -366,6 +385,10 @@ void MyOpenGLWidget::mouseMoveEvent(QMouseEvent* event) {
 	//	m_ModelLine->last_vertex.Position = ScreenToWorld(event->pos().x(), event->pos().y());
 	//	qDebug() << m_ModelLine->last_vertex.Position.x() << m_ModelLine->last_vertex.Position.y() << m_ModelLine->last_vertex.Position.z();
 	//}
+
+	if (m_CommandManager)
+		m_CommandManager->HandleMouseMove(event);
+
 	update();
 }
 
@@ -380,6 +403,10 @@ void MyOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Alt) {
 		m_IsAltPress = false;
 	}
+	if (event->key() == Qt::Key_Escape) {
+		m_CommandManager->HandleFinish(m_Document);
+	}
+	update();
 }
 //QVector3D MyOpenGLWidget::ScreenToWorld(int x, int y) {
 //	float ndcX = (2.0f * x) / width() - 1.0f;
@@ -582,7 +609,7 @@ void MyOpenGLWidget::PerformPicking(const QPoint& mousePos) {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, trianglessbo);
 
 	//上传射线数据
-	QVector3D origin = ScreenToWorld(mousePos.x(), mousePos.y());
+	QVector3D origin = Transform::ScreenToWorld(mousePos.x(), mousePos.y(), this->width(), this->height(), m_MatrixProjection, m_MatrixView);
 	QVector3D rayDir = ScreenPosToRayDir(mousePos.x(), mousePos.y());
 	GPURay ray;
 	ray.origin = glm::vec4(origin.x(), origin.y(), origin.z(), 1.0);

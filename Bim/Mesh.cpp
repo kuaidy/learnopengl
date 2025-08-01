@@ -3,8 +3,9 @@
 using namespace Bim;
 
 Mesh::Mesh() {
+	m_QOpengGlFunction = RenderContext::Instance().gl;
 }
-void Mesh::Draw(QOpenGLShaderProgram& shader, ElementType type) {
+void Mesh::DrawByType(QOpenGLShaderProgram& shader, ElementType type) {
 
 	switch (type)
 	{
@@ -25,7 +26,7 @@ void Mesh::Draw(QOpenGLShaderProgram& shader, ElementType type) {
 void Mesh::SetupMesh() {
 	// create buffers/arrays
 	m_QOpengGlFunction->glGenVertexArrays(1, &vao);
-	m_QOpengGlFunction->glBindVertexArray(vbo);
+	m_QOpengGlFunction->glBindVertexArray(vao);
 
 	qDebug() << "mesh vao:" << vao;
 
@@ -117,9 +118,12 @@ unsigned int Mesh::TextureFromFile(const std::string& filename, bool gamma)
 /// </summary>
 /// <param name="shader"></param>
 void Mesh::DrawLine(QOpenGLShaderProgram& shader) {
+	shader.bind();
 	m_QOpengGlFunction->glBindVertexArray(vao);
-	m_QOpengGlFunction->glDrawArrays(GL_LINE_STRIP, 0, vertices.size());
+	m_QOpengGlFunction->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+	m_QOpengGlFunction->glDrawArrays(GL_LINES, 0, vertices.size());
 	m_QOpengGlFunction->glBindVertexArray(0);
+	shader.release();
 }
 /// <summary>
 /// 普通的渲染

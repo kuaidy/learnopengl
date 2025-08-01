@@ -1,5 +1,7 @@
 #include "Line.h"
-Line::Line() {
+Line::Line(std::shared_ptr<CommandManager> commandManager,std::shared_ptr<Bim::Document> document):
+	m_CommandManager(commandManager),
+	m_Document(document){
 	m_Shader = new QOpenGLShaderProgram();
 	if (!m_Shader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./Shaders/Line.vert")) {
 		qDebug() << "Line Vertex shader error:" << m_Shader->log();
@@ -23,12 +25,12 @@ Line::Line() {
 		m_QOpenGLFunction->glBindVertexArray(0);
 	}
 }
-Line::~Line(){
+Line::~Line() {
 	delete m_Shader;
-	m_QOpenGLFunction->glDeleteBuffers(1, &vbo);
-	m_QOpenGLFunction->glDeleteVertexArrays(1, &vao);
+	//m_QOpenGLFunction->glDeleteBuffers(1, &vbo);
+	//m_QOpenGLFunction->glDeleteVertexArrays(1, &vao);
 }
-void Line::Draw(){
+void Line::Draw() {
 	if (this->mesh.vertices.size() == 0) return;
 	//加上最后一个点
 	vector<Bim::Vertex> tmpVertexes = this->mesh.vertices;
@@ -48,4 +50,6 @@ void Line::Draw(){
 
 	m_QOpenGLFunction->glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)tmpVertexes.size());
 	m_Shader->release();
+	if (this->mesh.vertices.size() == 2)
+		m_CommandManager->HandleFinish(m_Document);
 }

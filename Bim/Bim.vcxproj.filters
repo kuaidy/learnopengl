@@ -115,7 +115,7 @@
     <ClCompile Include="Commands\CommandManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Docment.cpp">
+    <ClCompile Include="Document.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Commands\LineCommand.cpp">
@@ -125,6 +125,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Commons\Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commons\RenderContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -210,7 +213,7 @@
     <ClInclude Include="Commands\CommandState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Docment.h">
+    <ClInclude Include="Document.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commands\LineCommand.h">
@@ -220,6 +223,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Commons\Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commons\RenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

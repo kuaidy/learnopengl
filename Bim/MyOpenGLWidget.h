@@ -18,17 +18,16 @@
 #include <QPainter>
 #include <Commands/CommandManager.h>
 #include <Commands/CommandState.h>
-#include "Docment.h"
+#include "Document.h"
 
 class MyOpenGLWidget :public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
 {
 public:
-	explicit MyOpenGLWidget(QWidget* parent = nullptr);
+	explicit MyOpenGLWidget(QWidget* parent = nullptr, 
+		std::shared_ptr<CommandManager> commandManager = nullptr,
+		std::shared_ptr<Document> document=nullptr);
 	~MyOpenGLWidget();
 	std::shared_ptr<FileLoader> file_loader;
-	std::shared_ptr<CommandManager> command_manager;
-	std::shared_ptr<Bim::Docment> document;
-
 	void CreateModelLine();
 	void InitMesh();
 
@@ -45,6 +44,9 @@ protected:
 private:
 
 	QOpenGLFunctions_4_5_Core* m_QOpengGlFunction;
+	std::shared_ptr<CommandManager> m_CommandManager;
+	std::shared_ptr<Document> m_Document;
+
 	std::shared_ptr<ModelLine> m_ModelLine;
 	std::shared_ptr<BasicPrimitives>m_BasicPrimitives;
 
@@ -73,7 +75,7 @@ private:
 	/// </summary>
 	QMatrix4x4 m_MatrixProjection;
 
-	QVector3D ScreenToWorld(int x, int y);
+	//QVector3D ScreenToWorld(int x, int y);
 	/// <summary>
 	/// 判断鼠标点击是否与模型的包围盒相交
 	/// </summary>
