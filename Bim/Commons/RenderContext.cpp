@@ -14,7 +14,7 @@ void RenderContext::Initialize(QOpenGLFunctions_4_5_Core* glFuncs,
 	this->gl = glFuncs;
 	this->width = width;
 	this->height = height;
-	this->MatrixModel = matrixModel;
-	this->MatrixView = matrixView;
-	this->MatrixProjection = matrixProjection;
+	this->matrix_model = matrixModel;
+	this->matrix_view = matrixView;
+	this->matrix_projection = matrixProjection;
 }

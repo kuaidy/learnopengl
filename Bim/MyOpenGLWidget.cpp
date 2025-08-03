@@ -36,17 +36,17 @@ MyOpenGLWidget::~MyOpenGLWidget()
 void MyOpenGLWidget::initializeGL() {
 	//初始化
 	initializeOpenGLFunctions();
-	//glDisable(GL_DEPTH_TEST);
-	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 	//// 启用混合,用来让包围盒透明
 	//glEnable(GL_BLEND);
 	//// 设置混合函数
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//禁止背面剔除
-	//glDisable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	// 启用线框模式
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//初始化几个变化矩阵
 	//模型矩阵
 	m_MatrixModel.translate(QVector3D(0.0f, 0.0f, 0.0f));
@@ -58,33 +58,6 @@ void MyOpenGLWidget::initializeGL() {
 	//投影矩阵
 	m_MatrixProjection.perspective(45.0, (float)this->width() / (float)this->height(), 0.1, 100.0);
 
-	m_Shader = new QOpenGLShaderProgram(this);
-	if (!m_Shader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./Shaders/VertexShader.glsl")) {
-		qDebug() << "Vertex shader error:" << m_Shader->log();
-	}
-	if (!m_Shader->addShaderFromSourceFile(QOpenGLShader::Fragment, "./Shaders/FragmentShader.glsl")) {
-		qDebug() << "Fragment shader error:" << m_Shader->log();
-	}
-	if (!m_Shader->link()) {
-		qDebug() << "Shader program link error:" << m_Shader->log();
-	}
-
-	m_PickShader = new QOpenGLShaderProgram(this);
-	if (!m_PickShader->addShaderFromSourceFile(QOpenGLShader::Compute, "./Shaders/Picking.vert")) {
-		qDebug() << "Picking shader error:" << m_PickShader->log();
-	}
-	if (!m_PickShader->link()) {
-		qDebug() << "Picking shader program link error:" << m_PickShader->log();
-	}
-
-	m_TestShader = new QOpenGLShaderProgram(this);
-	if (!m_TestShader->addShaderFromSourceFile(QOpenGLShader::Compute, "./Shaders/test.vert")) {
-		qDebug() << "Picking shader error:" << m_TestShader->log();
-	}
-	if (!m_TestShader->link()) {
-		qDebug() << "Picking shader program link error:" << m_TestShader->log();
-	}
-
 	m_QOpengGlFunction = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_4_5_Core>(QOpenGLContext::currentContext());
 	RenderContext::Instance().Initialize(m_QOpengGlFunction,
 		this->width(),
@@ -92,108 +65,14 @@ void MyOpenGLWidget::initializeGL() {
 		m_MatrixModel,
 		m_MatrixView,
 		m_MatrixProjection);
-
-	////有法向量的顶点数据
-	//float vertices[] = {
-	//	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-	//	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-	//	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-	//	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-	//	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-	//	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-	//	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-	//	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-	//	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-	//	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-	//	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-	//	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-	//	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-	//	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-	//	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-	//	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-	//	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-	//	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-	//	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-	//	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-	//	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-	//	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-	//	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-	//};
-
-	//Element element;
-	//int count = sizeof(vertices) / sizeof(float);
-	//for (int i = 0; i < count; i += 8) {
-	//	Bim::Vertex vertex;
-	//	vertex.Position = QVector3D(vertices[i], vertices[i + 1], vertices[i + 2]);
-	//	vertex.Normal = QVector3D(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
-	//	vertex.TexCoords = QVector2D(vertices[i + 6], vertices[i + 7]);
-	//	element.mesh.vertices.push_back(vertex);
-	//}
-	//Elements.push_back(element);
-
-	//for (auto ele: Elements) {
-	//	m_QOpengGlFunction->glGenVertexArrays(1, &VAO);
-	//	m_QOpengGlFunction->glBindVertexArray(VAO);
-
-	//	m_QOpengGlFunction->glGenBuffers(1, &VBO);
-	//	m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//	m_QOpengGlFunction->glBufferData(GL_ARRAY_BUFFER, ele.mesh.vertices.size() * sizeof(Vertex), ele.mesh.vertices.data(), GL_STATIC_DRAW);
-	//	qDebug() << m_QOpengGlFunction->glGetError();
-
-	//	//m_QOpengGlFunction->glGenBuffers(1, &EBO);
-	//	//m_QOpengGlFunction->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//	//m_QOpengGlFunction->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-	//	//qDebug() << m_QOpengGlFunction->glGetError();
-
-	//	// vertex Positions
-	//	m_QOpengGlFunction->glEnableVertexAttribArray(0);
-	//	m_QOpengGlFunction->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
-	//	qDebug() << m_QOpengGlFunction->glGetError();
-	//	// vertex normals
-	//	m_QOpengGlFunction->glEnableVertexAttribArray(1);
-	//	m_QOpengGlFunction->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	//	qDebug() << m_QOpengGlFunction->glGetError();
-	//	// vertex texture coords
-	//	m_QOpengGlFunction->glEnableVertexAttribArray(2);
-	//	m_QOpengGlFunction->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-	//	qDebug() << m_QOpengGlFunction->glGetError();
-	//}
-
-	//m_Model = new Model(func);
-	//m_Model->LoadFile("C:/MyProject/LearnOpenGL/Resources/labixiaoxin/62b01271ee64be39728ffda6d1a6f53a.obj");
-	//m_Model->LoadFile("C:/MyProject/LearnOpenGL/x64/Debug/Resources/backpack/backpack.obj");
-	//m_Mark = new Mark(func);
-	//m_ParametricModeling = new ParametricModeling(func);
-	//m_ModelLine = std::make_shared<ModelLine>(m_QOpengGlFunction);
-	//m_BasicPrimitives = std::make_shared<BasicPrimitives>(m_QOpengGlFunction);
-
 };
 void MyOpenGLWidget::resizeGL(int w, int h) {
 	glViewport(0, 0, w, h);
-	//投影矩阵
-	m_MatrixProjection.setToIdentity();
-	m_MatrixProjection.perspective(45.0, (float)w / (float)h, 0.1, 100.0);
-
 	RenderContext::Instance().width = w;
 	RenderContext::Instance().height = h;
+	//投影矩阵
+	RenderContext::Instance().matrix_projection.setToIdentity();
+	RenderContext::Instance().matrix_projection.perspective(45.0, (float)w / (float)h, 0.1, 100.0);
 };
 void MyOpenGLWidget::paintGL() {
 	//清除颜色和深度缓冲
@@ -485,8 +364,8 @@ void MyOpenGLWidget::wheelEvent(QWheelEvent* event) {
 	position.setX(m_CameraTarget.x() + m_Distance * cos(m_Pitch) * sin(m_Yaw));
 	position.setY(m_CameraTarget.y() + m_Distance * sin(m_Pitch));
 	position.setZ(m_CameraTarget.z() + m_Distance * cos(m_Pitch) * cos(m_Yaw));
-	m_MatrixView.setToIdentity();
-	m_MatrixView.lookAt(position, m_CameraTarget, m_Up);
+	RenderContext::Instance().matrix_view.setToIdentity();
+	RenderContext::Instance().matrix_view.lookAt(position, m_CameraTarget, m_Up);
 	update();
 }
 void MyOpenGLWidget::Scale() {

@@ -1,6 +1,6 @@
 #pragma once
 #include "ICommand.h"
-#include "Line.h"
+#include "../Builds/Line.h"
 #include "../Commons/Transform.h"
 #include "../Commons/RenderContext.h"
 #include "../Document.h"

@@ -13,22 +13,26 @@ public:
 	bool is_selected;
 	int objectId;
 
-	QOpenGLFunctions_4_5_Core* m_QOpenGLFunction;
-	QOpenGLShaderProgram* m_Shader;
+	QOpenGLFunctions_4_5_Core* opengl_funcs;
+	std::shared_ptr<QOpenGLShaderProgram> shader;
+
 	/// <summary>
 	/// 模型矩阵
 	/// </summary>
-	QMatrix4x4 m_MatrixModel;
+	QMatrix4x4 matrix_model;
 	/// <summary>
 	/// 观察矩阵
 	/// </summary>
-	QMatrix4x4 m_MatrixView;
+	QMatrix4x4 matrix_view;
 	/// <summary>
 	/// 投影矩阵
 	/// </summary>
-	QMatrix4x4 m_MatrixProjection;
+	QMatrix4x4 matrix_projection;
 	int width;
 	int height;
+	unsigned int vao;
+	unsigned int vbo;
+	unsigned int ebo;
 };
 
 /// <summary>

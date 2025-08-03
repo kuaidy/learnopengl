@@ -17,6 +17,7 @@ void Mesh::DrawByType(QOpenGLShaderProgram& shader, ElementType type) {
 	case ElementType::Surface:
 		break;
 	case ElementType::Volume:
+		Draw(shader);
 		break;
 	default:
 		Draw(shader);
@@ -119,9 +120,12 @@ unsigned int Mesh::TextureFromFile(const std::string& filename, bool gamma)
 /// <param name="shader"></param>
 void Mesh::DrawLine(QOpenGLShaderProgram& shader) {
 	shader.bind();
+	shader.setUniformValue("view", RenderContext::Instance().matrix_view);
+	shader.setUniformValue("projection", RenderContext::Instance().matrix_projection);
 	m_QOpengGlFunction->glBindVertexArray(vao);
 	m_QOpengGlFunction->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 	m_QOpengGlFunction->glDrawArrays(GL_LINES, 0, vertices.size());
+	m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER,0);
 	m_QOpengGlFunction->glBindVertexArray(0);
 	shader.release();
 }
@@ -130,6 +134,11 @@ void Mesh::DrawLine(QOpenGLShaderProgram& shader) {
 /// </summary>
 /// <param name="shader"></param>
 void Mesh::Draw(QOpenGLShaderProgram& shader) {
+	shader.bind();
+	shader.setUniformValue("model", RenderContext::Instance().matrix_model);
+	shader.setUniformValue("view", RenderContext::Instance().matrix_view);
+	shader.setUniformValue("projection", RenderContext::Instance().matrix_projection);
+
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -161,7 +170,7 @@ void Mesh::Draw(QOpenGLShaderProgram& shader) {
 	m_QOpengGlFunction->glBindVertexArray(vao);
 	m_QOpengGlFunction->glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
 	//m_QOpengGlFunction->glDrawArrays(GL_TRIANGLES,0,vertices.size());
-	//m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER, 0);
+	m_QOpengGlFunction->glBindBuffer(GL_ARRAY_BUFFER, 0);
 	m_QOpengGlFunction->glBindVertexArray(0);
-	m_QOpengGlFunction->glActiveTexture(GL_TEXTURE0);
+	shader.release();
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <QMouseEvent>
-#include "Document.h"
+#include "../Document.h"
 
 class ICommand
 {
@@ -12,5 +12,6 @@ public:
 	virtual void OnMouseMove(QMouseEvent* event) = 0;
 	virtual void OnMouseRelease(QMouseEvent* event) = 0;
 	virtual void OnDraw() = 0;
+	virtual ~ICommand() = default;
 };
 

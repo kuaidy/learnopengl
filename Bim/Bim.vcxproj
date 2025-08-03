@@ -103,9 +103,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Builds\Line.cpp" />
+    <ClCompile Include="Commands\BallCommand.cpp" />
+    <ClCompile Include="Builds\Ball.cpp" />
     <ClCompile Include="Commands\CommandManager.cpp" />
     <ClCompile Include="Commands\AreaMarkCommand.cpp" />
     <ClCompile Include="BasicPrimitives.cpp" />
+    <ClCompile Include="Commands\LineCommand.cpp" />
     <ClCompile Include="Document.cpp" />
     <ClCompile Include="Element.cpp" />
     <ClCompile Include="ElementProperty.cpp" />
@@ -114,8 +118,6 @@
     <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Commands\ICommand.cpp" />
     <ClCompile Include="IfcLoader.cpp" />
-    <ClCompile Include="Commands\LineCommand.cpp" />
-    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Mark.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -133,20 +135,24 @@
     <ClCompile Include="ui\BuildView.cpp" />
     <ClCompile Include="ui\EditView.cpp" />
     <QtRcc Include="Bim.qrc" />
-    <QtUic Include="BimMainWindow.ui" />
-    <QtMoc Include="BimMainWindow.h">
+    <QtUic Include="ui\BimMainWindow.ui" />
+    <QtMoc Include="ui\BimMainWindow.h">
     </QtMoc>
-    <ClCompile Include="BimMainWindow.cpp" />
+    <ClCompile Include="ui\BimMainWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="ui\BuildView.ui" />
     <QtUic Include="ui\EditView.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Builds\Line.h" />
+    <ClInclude Include="Commands\BallCommand.h" />
+    <ClInclude Include="Builds\Ball.h" />
     <ClInclude Include="Commands\CommandManager.h" />
     <ClInclude Include="Commands\AreaMarkCommand.h" />
     <ClInclude Include="BasicPrimitives.h" />
     <ClInclude Include="Commands\CommandMode.h" />
     <ClInclude Include="Commands\CommandState.h" />
+    <ClInclude Include="Commands\LineCommand.h" />
     <ClInclude Include="Document.h" />
     <ClInclude Include="Element.h" />
     <ClInclude Include="ElementProperty.h" />
@@ -158,8 +164,6 @@
     <ClInclude Include="IfcLoader.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="Commands\LineCommand.h" />
-    <ClInclude Include="Line.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Mark.h" />
     <ClInclude Include="Mesh.h" />

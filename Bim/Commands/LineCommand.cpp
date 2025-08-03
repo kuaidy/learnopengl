@@ -8,10 +8,10 @@ LineCommand::LineCommand(std::shared_ptr<CommandManager> commandManager,
 {
 	m_Line = std::make_shared<Line>(m_CommandManager,m_Document);
 	m_Line->elementType = ElementType::Line;
-	m_Line->m_QOpenGLFunction = RenderContext::Instance().gl;
-	m_Line->m_MatrixModel = RenderContext::Instance().MatrixModel;
-	m_Line->m_MatrixView = RenderContext::Instance().MatrixView;
-	m_Line->m_MatrixProjection = RenderContext::Instance().MatrixProjection;
+	m_Line->opengl_funcs = RenderContext::Instance().gl;
+	m_Line->matrix_model = RenderContext::Instance().matrix_model;
+	m_Line->matrix_view = RenderContext::Instance().matrix_view;
+	m_Line->matrix_projection = RenderContext::Instance().matrix_projection;
 }
 
 void LineCommand::Execute() {
@@ -29,8 +29,8 @@ void LineCommand::OnMousePress(QMouseEvent* event) {
 		event->pos().y(),
 		RenderContext::Instance().width,
 		RenderContext::Instance().height,
-		m_Line->m_MatrixProjection,
-		m_Line->m_MatrixView);
+		m_Line->matrix_projection,
+		m_Line->matrix_view);
 	Bim::Vertex vertex;
 	vertex.Position = p;
 	m_Line->mesh.vertices.push_back(vertex);
@@ -41,8 +41,8 @@ void LineCommand::OnMouseMove(QMouseEvent* event) {
 		event->pos().y(),
 		RenderContext::Instance().width,
 		RenderContext::Instance().height,
-		m_Line->m_MatrixProjection,
-		m_Line->m_MatrixView);
+		m_Line->matrix_projection,
+		m_Line->matrix_view);
 }
 void LineCommand::OnMouseRelease(QMouseEvent* event) {
 

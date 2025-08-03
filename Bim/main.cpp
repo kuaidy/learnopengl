@@ -1,4 +1,4 @@
-#include "BimMainWindow.h"
+#include "ui/BimMainWindow.h"
 #include <QtWidgets/QApplication>
 #include <Commands/CommandManager.h>
 #include "Document.h"

@@ -1,32 +1,32 @@
 #include "CommandManager.h"
 void CommandManager::SetCommand(std::shared_ptr<ICommand> cmd) {
-	if (m_CurrentCommand)
-		m_CurrentCommand->Cancel();
-	m_CurrentCommand = cmd;
+	if (current_command)
+		current_command->Cancel();
+	current_command = cmd;
 }
 void CommandManager::ClearCommand() {
-	if (m_CurrentCommand)
-		m_CurrentCommand->Cancel();
-	m_CurrentCommand = nullptr;
+	if (current_command)
+		current_command->Cancel();
+	current_command = nullptr;
 }
 void CommandManager::HandleMousePress(QMouseEvent* e) {
-	if (m_CurrentCommand)
-		m_CurrentCommand->OnMousePress(e);
+	if (current_command)
+		current_command->OnMousePress(e);
 }
 void CommandManager::HandleMouseMove(QMouseEvent* e) {
-	if (m_CurrentCommand)
-		m_CurrentCommand->OnMouseMove(e);
+	if (current_command)
+		current_command->OnMouseMove(e);
 }
 void CommandManager::HandleMouseRelease(QMouseEvent* e) {
-	if (m_CurrentCommand)
-		m_CurrentCommand->OnMouseRelease(e);
+	if (current_command)
+		current_command->OnMouseRelease(e);
 }
 void CommandManager::HandleDraw() {
-	if (m_CurrentCommand)
-		m_CurrentCommand->OnDraw();
+	if (current_command)
+		current_command->OnDraw();
 }
 void CommandManager::HandleFinish(std::shared_ptr<Bim::Document> document) {
-	if (m_CurrentCommand)
-		m_CurrentCommand->Finish(document);
-	m_CurrentCommand = nullptr;
+	if (current_command)
+		current_command->Finish(document);
+	current_command = nullptr;
 }
