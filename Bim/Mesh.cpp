@@ -14,7 +14,8 @@ void Mesh::DrawByType(QOpenGLShaderProgram& shader, ElementType type) {
 	case ElementType::Line:
 		DrawLine(shader);
 		break;
-	case ElementType::Surface:
+	case ElementType::Plane:
+		Draw(shader);
 		break;
 	case ElementType::Volume:
 		Draw(shader);
@@ -63,7 +64,7 @@ void Mesh::SetupMesh() {
 	m_QOpengGlFunction->glBindVertexArray(0);              // 再解绑 VAO
 }
 /// <summary>
-/// ��ȡͼƬ
+/// 贴图
 /// </summary>
 /// <param name="path"></param>
 /// <param name="directory"></param>

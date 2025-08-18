@@ -8,7 +8,7 @@
 class Element {
 public:
 	std::string name;
-	ElementType elementType;
+	ElementType element_type;
 	Bim::Mesh mesh;
 	bool is_selected;
 	int objectId;

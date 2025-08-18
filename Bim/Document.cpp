@@ -13,6 +13,6 @@ void Bim::Document::AddElement(std::shared_ptr<Element> element) {
 /// </summary>
 void Bim::Document::DrawElements() {
 	for (int i = 0; i < elements.size(); ++i) {
-		elements[i]->mesh.DrawByType(*(elements[i]->shader),elements[i]->elementType);
+		elements[i]->mesh.DrawByType(*(elements[i]->shader),elements[i]->element_type);
 	}
 }

@@ -7,6 +7,6 @@ enum class ElementType {
 	Point,
 	Line,
 	Polyline,
-	Surface,
+	Plane,
 	Volume
 };

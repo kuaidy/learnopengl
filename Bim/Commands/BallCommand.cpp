@@ -5,10 +5,7 @@ BallCommand::BallCommand(std::shared_ptr<CommandManager> commandmanager,
 	m_document(document)
 {
 	m_ball = std::make_shared<Ball>(m_command_manager,m_document);
-	m_ball->elementType = ElementType::Volume;
-	m_ball->matrix_model = RenderContext::Instance().matrix_model;
-	m_ball->matrix_view = RenderContext::Instance().matrix_view;
-	m_ball->matrix_projection = RenderContext::Instance().matrix_projection;
+	m_ball->element_type = ElementType::Volume;
 }
 void BallCommand::Execute() {
 

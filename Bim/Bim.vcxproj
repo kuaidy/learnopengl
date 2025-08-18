@@ -108,7 +108,6 @@
     <ClCompile Include="Builds\Ball.cpp" />
     <ClCompile Include="Commands\CommandManager.cpp" />
     <ClCompile Include="Commands\AreaMarkCommand.cpp" />
-    <ClCompile Include="BasicPrimitives.cpp" />
     <ClCompile Include="Commands\LineCommand.cpp" />
     <ClCompile Include="Document.cpp" />
     <ClCompile Include="Element.cpp" />
@@ -127,6 +126,8 @@
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="ParametricModeling.cpp" />
     <ClCompile Include="Commons\RenderContext.cpp" />
+    <ClCompile Include="Commands\RectanglePlaneCommand.cpp" />
+    <ClCompile Include="Builds\RectanglePlane.cpp" />
     <ClCompile Include="SceneTree.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
@@ -149,7 +150,6 @@
     <ClInclude Include="Builds\Ball.h" />
     <ClInclude Include="Commands\CommandManager.h" />
     <ClInclude Include="Commands\AreaMarkCommand.h" />
-    <ClInclude Include="BasicPrimitives.h" />
     <ClInclude Include="Commands\CommandMode.h" />
     <ClInclude Include="Commands\CommandState.h" />
     <ClInclude Include="Commands\LineCommand.h" />
@@ -173,6 +173,8 @@
     <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="ParametricModeling.h" />
     <ClInclude Include="Commons\RenderContext.h" />
+    <ClInclude Include="Commands\RectanglePlaneCommand.h" />
+    <ClInclude Include="Builds\RectanglePlane.h" />
     <ClInclude Include="SceneTree.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />
