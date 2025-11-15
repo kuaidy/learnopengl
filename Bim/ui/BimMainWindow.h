@@ -10,6 +10,9 @@
 #include <QStandardItemModel>
 #include <QtVariantPropertyManager>
 
+#include <vsg/all.h>
+#include <vsgQt/Window.h>
+
 #include "MyOpenGLWidget.h"
 #include "FileLoadFactory.h"
 #include <ui/EditView.h>
@@ -48,9 +51,14 @@ private:
 	void FillTreeModel(const SceneTree& treeNode, QStandardItem* parentItem);
 	void ShowNodeProperties(const int nodeIndex);
 
+	vsgQt::Window* CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer, vsg::ref_ptr<vsg::WindowTraits> traits, vsg::ref_ptr<vsg::Node> vsg_scene, QWindow* parent, const QString& title);
+
 	EditView* edit_view;
 	BuildView* build_view;
 
+	vsg::ref_ptr<vsg::Group> m_vsgScene;
+	vsg::ref_ptr<vsg::Options> m_vsgOptions;
+	vsg::ref_ptr<vsgQt::Viewer> m_vsgViewer;
 
 };
 

@@ -21,13 +21,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -66,12 +66,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MyProject\LearnOpenGL\packages;C:\MyProject\LearnOpenGL\packages\assimp-5.4.3\include;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\src;C:\MyProject\LearnOpenGL\packages\vsgQt-0.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;QtSolutions_PropertyBrowser-headd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\MyProject\LearnOpenGL\packages\assimp-5.4.3;C:\MyProject\LearnOpenGL\packages\qtpropertybrowser\lib;C:\MyProject\LearnOpenGL\packages\vsgQt-0.4.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;QtSolutions_PropertyBrowser-headd.lib;vsgQtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -139,7 +141,10 @@
     <QtUic Include="ui\BimMainWindow.ui" />
     <QtMoc Include="ui\BimMainWindow.h">
     </QtMoc>
-    <ClCompile Include="ui\BimMainWindow.cpp" />
+    <ClCompile Include="ui\BimMainWindow.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+      <PreprocessKeepComments Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessKeepComments>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
     <QtUic Include="ui\BuildView.ui" />
     <QtUic Include="ui\EditView.ui" />

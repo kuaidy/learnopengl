@@ -246,19 +246,40 @@ void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 }
 
 void MyOpenGLWidget::mouseMoveEvent(QMouseEvent* event) {
-	if (m_IsAltPress && m_IsRightMousePress) {
+	if (m_IsRightMousePress) {
+		QVector3D origin = Transform::ScreenToWorld(m_RightMousePoint.x(), m_RightMousePoint.y(), this->width(), this->height(), m_MatrixProjection, m_MatrixView);
 		QPoint delta = event->pos() - m_RightMousePoint;
 		float sensitivity = 0.005f;
 		m_Yaw += delta.x() * sensitivity;
 		m_Pitch += -delta.y() * sensitivity;
 		m_Pitch = clamp(m_Pitch, -1.55f, 1.55f);  // 限制角度
-		QVector3D position;
-		position.setX(m_CameraTarget.x() + m_Distance * cos(m_Pitch) * sin(m_Yaw));
-		position.setY(m_CameraTarget.y() + m_Distance * sin(m_Pitch));
-		position.setZ(m_CameraTarget.z() + m_Distance * cos(m_Pitch) * cos(m_Yaw));
-		m_MatrixView.setToIdentity();
-		m_MatrixView.lookAt(position, m_CameraTarget, m_Up);
-		m_RightMousePoint = event->pos();
+		 
+
+		//QMatrix4x4 mt;
+		//QVector3D  origin - RenderContext::Instance().m_CameraTarget;
+		//RenderContext::Instance().matrix_view.setToIdentity();
+		//RenderContext::Instance().matrix_view.translate(-origin);
+		//RenderContext::Instance().matrix_view.rotate(m_Yaw, QVector3D(0, 1, 0));
+		//RenderContext::Instance().matrix_view.rotate(m_Pitch, QVector3D(1, 0, 0));
+		//RenderContext::Instance().matrix_view.translate(origin);
+	/*	QVector3D dir = RenderContext::Instance().m_CameraTarget - RenderContext::Instance().m_CameraPos;
+		QVector3D offset = RenderContext::Instance().m_CameraPos - origin;
+		QMatrix4x4 rot;
+		rot.rotate(m_Yaw,QVector3D(0,1,0));
+		rot.rotate(m_Pitch,QVector3D(1,0,0));
+		QVector3D newOffset = rot.mapVector(origin);
+		QVector3D newCameraPos = origin + newOffset;
+		QVector3D newTarget = newCameraPos + dir;
+		RenderContext::Instance().matrix_view.setToIdentity();
+		RenderContext::Instance().matrix_view.lookAt(newOffset, newTarget, RenderContext::Instance().m_Up);*/
+		
+		//QVector3D position;
+		//position.setX(m_CameraTarget.x() + m_Distance * cos(m_Pitch) * sin(m_Yaw));
+		//position.setY(m_CameraTarget.y() + m_Distance * sin(m_Pitch));
+		//position.setZ(m_CameraTarget.z() + m_Distance * cos(m_Pitch) * cos(m_Yaw));
+		//m_MatrixView.setToIdentity();
+		//m_MatrixView.lookAt(position, m_CameraTarget, m_Up);
+		//m_RightMousePoint = event->pos();
 	}
 	//if (command_manager->commandState == CommandState::Doing && command_manager->commandMode == CommandMode::Line) {
 	//	m_ModelLine->last_vertex.Position = ScreenToWorld(event->pos().x(), event->pos().y());
