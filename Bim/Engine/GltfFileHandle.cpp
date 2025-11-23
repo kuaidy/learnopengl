@@ -77,133 +77,19 @@ namespace Bim
 
 			}
 			else {
+				std::shared_ptr<Scene::Node> sceneNode = std::make_shared<Scene::Node>();
+				sceneNode->localMatrix = GetLocalMatrix(node);
+				sceneNode->globalMatrix = _worldMatrices[nodeIndex];
 
-			}
-			std::shared_ptr<Scene::Node> sceneNode = std::make_shared<Scene::Node>();
-			sceneNode->localMatrix = GetLocalMatrix(node);
-			sceneNode->globalMatrix = _worldMatrices[nodeIndex];
-
-			std::shared_ptr<Graphics::Model> nodeModel = std::make_shared<Graphics::Model>();
-			if (node.mesh >= 0) {
-				tinygltf::Mesh mesh = model.meshes[node.mesh];
-				for (const auto& prim : mesh.primitives) {
-					std::shared_ptr<Graphics::Mesh> modelMesh = std::make_shared<Graphics::Mesh>();
-
-					//线模型去掉
-					if (prim.mode == TINYGLTF_MODE_LINE) continue;
-					//获取顶点位置
-					std::vector<float> positions;
-					auto accessorIndex = prim.attributes.find("POSITION");
-					if (accessorIndex != prim.attributes.end()) {
-						const tinygltf::Accessor& accessor = model.accessors[accessorIndex->second];
-						const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
-						const tinygltf::Buffer& buffer = model.buffers[view.buffer];
-						const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
-						size_t count = accessor.count;
-						size_t stride = accessor.ByteStride(view);
-						if (stride == 0) {
-							stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
-						}
-						for (size_t i = 0; i < count; ++i) {
-							const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
-							for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
-								positions.push_back(src[j]);
-							}
-						}
-					}
-
-					//获取索引
-					std::vector<unsigned int> indices;
-					if (prim.indices >= 0) {
-						const tinygltf::Accessor& accessor = model.accessors[prim.indices];
-						const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
-						const tinygltf::Buffer& buffer = model.buffers[view.buffer];
-						const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
-						for (size_t k = 0; k < accessor.count; ++k) {
-							uint32_t index = 0;
-							switch (accessor.componentType) {
-							case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-								index = *(reinterpret_cast<const uint8_t*>(dataPtr + k));
-								break;
-							case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-								index = *(reinterpret_cast<const uint16_t*>(dataPtr + k * sizeof(uint16_t)));
-								break;
-							case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-								index = *(reinterpret_cast<const uint32_t*>(dataPtr + k * sizeof(uint32_t)));
-								break;
-							}
-							indices.push_back(index);
-						}
-					}
-					else {
-						//没有索引，去重，并重建索引
-						std::unordered_map<QuantizedVertex, unsigned int, QuantizedHash, QuantizedEqual> vertexMap;
-						std::vector<QuantizedVertex> uniquePnts;
-						std::vector<float> tmpPositions;
-						for (size_t i = 0; i + 2 < positions.size(); i += 3) {
-							float x = positions[i];
-							float y = positions[i + 1];
-							float z = positions[i + 2];
-							/*Graphics::Point p;
-							p.x = x;
-							p.y = y;
-							p.z = z;*/
-							QuantizedVertex qv = QuantizeVertex(x, y, z);
-							auto it = vertexMap.find(qv);
-							if (it != vertexMap.end())
-							{
-								// 已存在，直接复用索引
-								indices.push_back(it->second);
-							}
-							else
-							{
-								uint32_t newIndex = static_cast<uint32_t>(uniquePnts.size());
-								uniquePnts.push_back(qv);
-								tmpPositions.push_back(x);
-								tmpPositions.push_back(y);
-								tmpPositions.push_back(z);
-								vertexMap[qv] = newIndex;
-								indices.push_back(newIndex);
-							}
-						}
-						positions.clear();
-						positions = tmpPositions;
-					}
-					//得到世界坐标
-					//std::vector<float> worldPositions = GetWorldPositions(positions, nodeIndex);
-
-					//获取法向量
-					std::vector<float> normals;
-					auto normalAccessorIndex = prim.attributes.find("NORMAL");
-					if (normalAccessorIndex != prim.attributes.end()) {
-						const tinygltf::Accessor& accessor = model.accessors[normalAccessorIndex->second];
-						const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
-						const tinygltf::Buffer& buffer = model.buffers[view.buffer];
-						const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
-						size_t count = accessor.count;
-						size_t stride = accessor.ByteStride(view);
-						if (stride == 0) {
-							stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
-						}
-						for (size_t i = 0; i < count; ++i) {
-							const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
-							for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
-								normals.push_back(src[j]);
-							}
-						}
-					}
-					modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
-					modelMesh->indices.insert(modelMesh->indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
-					modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
-
-					nodeModel->meshes.push_back(modelMesh);
+				if (node.mesh >= 0) {
+					tinygltf::Mesh mesh = model.meshes[node.mesh];
+					auto nodeModel = CreateModel(model, mesh);
+					sceneNode->model = nodeModel;
 				}
-			}
-			sceneNode->model = nodeModel;
-			parentNode->children.push_back(sceneNode);
-
-			for (auto child : node.children) {
-				AnalysisModel(model, child, sceneNode);
+				parentNode->children.push_back(sceneNode);
+				for (auto child : node.children) {
+					AnalysisModel(model, child, sceneNode);
+				}
 			}
 		}
 		/// <summary>
@@ -324,16 +210,150 @@ namespace Bim
 		}
 		void CreateRobot(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Robot>& robot) {
 			auto node = model.nodes[nodeIndex];
-			if (node.name.find("Baseframe")!=std::string::npos)
+			if (node.name.find("Baseframe") != std::string::npos ||
+				node.name.find("J1") != std::string::npos ||
+				node.name.find("J2") != std::string::npos ||
+				node.name.find("J3") != std::string::npos ||
+				node.name.find("J4") != std::string::npos ||
+				node.name.find("J5") != std::string::npos
+				)
 			{
 				std::shared_ptr<Robot::Joint> joint = std::make_shared<Robot::Joint>();
 				robot->joints.push_back(joint);
+
+				std::shared_ptr<Robot::Link> link = std::make_shared<Robot::Link>();
+				CreateLink(model, node.children[1], link);
+				robot->links.push_back(link);
+
+				CreateRobot(model, node.children[0], robot);
 			}
 		}
-		std::shared_ptr<Robot::Link> CreateLink(const tinygltf::Model& model, int nodeIndex) {
+		void CreateLink(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Link>& link) {
 			auto node = model.nodes[nodeIndex];
-			if (node.mesh>0) {
+			if (node.mesh > 0) {
+				auto nodeModel = CreateModel(model, model.meshes[node.mesh]);
+				link->model = nodeModel;
+				return;
+			}
+			for (int child : node.children)
+			{
+				CreateLink(model, child, link);
+			}
+		}
+		std::shared_ptr<Graphics::Model> CreateModel(const tinygltf::Model& model, const tinygltf::Mesh& mesh) {
+			std::shared_ptr<Graphics::Model> nodeModel = std::make_shared<Graphics::Model>();
+			for (const auto& prim : mesh.primitives) {
+				std::shared_ptr<Graphics::Mesh> modelMesh = std::make_shared<Graphics::Mesh>();
 
+				//线模型去掉
+				if (prim.mode == TINYGLTF_MODE_LINE) continue;
+				//获取顶点位置
+				std::vector<float> positions;
+				auto accessorIndex = prim.attributes.find("POSITION");
+				if (accessorIndex != prim.attributes.end()) {
+					const tinygltf::Accessor& accessor = model.accessors[accessorIndex->second];
+					const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = model.buffers[view.buffer];
+					const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+					size_t count = accessor.count;
+					size_t stride = accessor.ByteStride(view);
+					if (stride == 0) {
+						stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
+					}
+					for (size_t i = 0; i < count; ++i) {
+						const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
+						for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
+							positions.push_back(src[j]);
+						}
+					}
+				}
+
+				//获取索引
+				std::vector<unsigned int> indices;
+				if (prim.indices >= 0) {
+					const tinygltf::Accessor& accessor = model.accessors[prim.indices];
+					const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = model.buffers[view.buffer];
+					const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+					for (size_t k = 0; k < accessor.count; ++k) {
+						uint32_t index = 0;
+						switch (accessor.componentType) {
+						case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+							index = *(reinterpret_cast<const uint8_t*>(dataPtr + k));
+							break;
+						case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+							index = *(reinterpret_cast<const uint16_t*>(dataPtr + k * sizeof(uint16_t)));
+							break;
+						case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+							index = *(reinterpret_cast<const uint32_t*>(dataPtr + k * sizeof(uint32_t)));
+							break;
+						}
+						indices.push_back(index);
+					}
+				}
+				else {
+					//没有索引，去重，并重建索引
+					std::unordered_map<QuantizedVertex, unsigned int, QuantizedHash, QuantizedEqual> vertexMap;
+					std::vector<QuantizedVertex> uniquePnts;
+					std::vector<float> tmpPositions;
+					for (size_t i = 0; i + 2 < positions.size(); i += 3) {
+						float x = positions[i];
+						float y = positions[i + 1];
+						float z = positions[i + 2];
+						/*Graphics::Point p;
+						p.x = x;
+						p.y = y;
+						p.z = z;*/
+						QuantizedVertex qv = QuantizeVertex(x, y, z);
+						auto it = vertexMap.find(qv);
+						if (it != vertexMap.end())
+						{
+							// 已存在，直接复用索引
+							indices.push_back(it->second);
+						}
+						else
+						{
+							uint32_t newIndex = static_cast<uint32_t>(uniquePnts.size());
+							uniquePnts.push_back(qv);
+							tmpPositions.push_back(x);
+							tmpPositions.push_back(y);
+							tmpPositions.push_back(z);
+							vertexMap[qv] = newIndex;
+							indices.push_back(newIndex);
+						}
+					}
+					positions.clear();
+					positions = tmpPositions;
+				}
+				//得到世界坐标
+				//std::vector<float> worldPositions = GetWorldPositions(positions, nodeIndex);
+
+				//获取法向量
+				std::vector<float> normals;
+				auto normalAccessorIndex = prim.attributes.find("NORMAL");
+				if (normalAccessorIndex != prim.attributes.end()) {
+					const tinygltf::Accessor& accessor = model.accessors[normalAccessorIndex->second];
+					const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = model.buffers[view.buffer];
+					const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+					size_t count = accessor.count;
+					size_t stride = accessor.ByteStride(view);
+					if (stride == 0) {
+						stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
+					}
+					for (size_t i = 0; i < count; ++i) {
+						const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
+						for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
+							normals.push_back(src[j]);
+						}
+					}
+				}
+				modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
+				modelMesh->indices.insert(modelMesh->indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
+				modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
+
+				nodeModel->meshes.push_back(modelMesh);
+				return nodeModel;
 			}
 		}
 	}
