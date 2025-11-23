@@ -18,6 +18,8 @@
 #include <ui/EditView.h>
 #include <ui/BuildView.h>
 #include "Document.h"
+#include "../Graphics/Mesh.h"
+#include "../Scene/Node.h"
 
 using namespace std;
 
@@ -33,7 +35,9 @@ public:
 	~BimMainWindow();
 	void OpenModule(string path);
 	std::shared_ptr<FileLoader> file_loader;
-	
+	vsg::ref_ptr<vsg::StateGroup> CreateNodeFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh);
+	void ShowScene(const std::shared_ptr<Bim::Scene::Node>& node);
+	vsg::ref_ptr<vsg::StateGroup> CreateGeometryFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh);
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);
@@ -59,6 +63,7 @@ private:
 	vsg::ref_ptr<vsg::Group> m_vsgScene;
 	vsg::ref_ptr<vsg::Options> m_vsgOptions;
 	vsg::ref_ptr<vsgQt::Viewer> m_vsgViewer;
-
+	vsg::ref_ptr<vsg::ShaderStage> m_vertexShader;
+	vsg::ref_ptr<vsg::ShaderStage> m_fragmentShader;
 };
 
