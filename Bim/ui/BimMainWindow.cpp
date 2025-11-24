@@ -99,6 +99,22 @@ void BimMainWindow::on_fileopen_triggered() {
 
 	m_vsgViewer->compile();
 
+	//移动模型
+
+	
+	m_targetTransform = FindTransformByGuid(m_vsgScene, "Transform_Object_2");
+	if (m_targetTransform)
+	{
+		// 创建并启动动画定时器（例如每 50ms 更新一次 ≈ 20 FPS）
+		m_animationTimer = new QTimer(this);
+		connect(m_animationTimer, &QTimer::timeout, this, [this]()
+			{
+				static double x = 0.0;
+				x += 0.1; // 每次向右移动 0.1 单位
+				m_targetTransform->matrix = vsg::translate(x, 0.0, 0.0);
+			});
+		m_animationTimer->start(20); // 50 毫秒间隔
+	}
 	/*auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
 	if (vsgNode) {
 		m_vsgScene->addChild(vsgNode);
@@ -274,7 +290,7 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 	return window;
 }
 
-vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh) {
+vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh, const std::string& guid) {
 	if (!mesh) {
 		return nullptr;
 	}
@@ -314,6 +330,7 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::share
 	vid->assignIndices(indices);
 	vid->indexCount = static_cast<uint32_t>(indices->size());
 	vid->instanceCount = 1;
+	vid->setValue("guid", guid);
 
 	m_vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/base.vert", m_vsgOptions);
 	m_fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/base.frag", m_vsgOptions);
@@ -395,7 +412,7 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::share
 
 	// set up model transformation node
 	auto transform = vsg::MatrixTransform::create(); // VK_SHADER_STAGE_VERTEX_BIT
-
+	transform->setValue("guid", std::string("Transform_" + guid));
 	// add transform to root of the scene graph
 
 	// setup geometry
@@ -414,7 +431,7 @@ void BimMainWindow::ShowScene(const std::shared_ptr<Bim::Scene::Node>& node)
 {
 	if (node->model) {
 		for (const auto& mesh : node->model->meshes) {
-			auto vsgNode = CreateNodeFromMesh(mesh);
+			auto vsgNode = CreateNodeFromMesh(mesh, node->guid);
 			if (vsgNode) {
 				m_vsgScene->addChild(vsgNode);
 			}
@@ -513,3 +530,36 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateGeometryFromMesh(const std::s
 
 	//return geometry;
 }
+
+vsg::ref_ptr<vsg::MatrixTransform> BimMainWindow::FindTransformByGuid(vsg::Node* rootNode, const std::string& guid)
+{
+	struct Visitor : public vsg::Visitor
+	{
+		const std::string& targetGuid;
+		vsg::ref_ptr<vsg::MatrixTransform> found;
+
+		Visitor(const std::string& guid) : targetGuid(guid) {}
+
+		void apply(vsg::Object& object) override
+		{
+			// 只检查 MatrixTransform 类型
+			if (auto transform = object.cast<vsg::MatrixTransform>())
+			{
+				std::string nodeGuid;
+				if (transform->getValue("guid", nodeGuid) && nodeGuid == targetGuid)
+				{
+					found = transform;
+					return; // 找到即停（若需找多个则继续）
+				}
+			}
+
+			// 继续遍历子节点
+			object.traverse(*this);
+		}
+	};
+
+	Visitor visitor(guid);
+	rootNode->accept(visitor);
+	return visitor.found;
+}
+

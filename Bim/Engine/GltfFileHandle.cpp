@@ -2,6 +2,7 @@
 #include <string>
 #include "Utility.h"
 #include "../Graphics/Point.h"
+#include "../json.hpp"
 
 namespace Bim
 {
@@ -25,6 +26,40 @@ namespace Bim
 			}
 			_model = model;
 			GetNodeMatrix(model);
+
+			for (const tinygltf::Node& node : model.nodes)
+			{
+				nlohmann::json root;
+				//构建普通节点
+				nlohmann::json snode;
+				snode["type"] = "SNode";
+				snode["localMatrix"] = node.matrix;
+				snode["component"] = nlohmann::json::array();
+				snode["component"].push_back(node.name);
+				snode["childArr"] = nlohmann::json::array();
+
+				nlohmann::json groupNode;
+				groupNode["type"] = "DGroup";
+				groupNode["childAttr"] = nlohmann::json::array();
+
+				nlohmann::json dNode;
+				dNode["type"] = "DNode";
+				dNode["name"] = "label";
+				dNode["parentArr"] = nlohmann::json::array();
+
+				groupNode["parent"] = dNode;
+
+				snode["parent"] = groupNode;
+
+				root["nodes"] = nlohmann::json::array();
+				root["nodes"].push_back(snode);
+
+				//构建机构节点
+
+
+			}
+
+
 			const tinygltf::Scene& scene = model.scenes[model.defaultScene];
 
 			auto& ctx = Engine::GetGlobalContext();
@@ -73,23 +108,19 @@ namespace Bim
 		/// <param name="model"></param>
 		void GltfFileHandle::AnalysisModel(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Scene::Node>& parentNode) {
 			auto node = model.nodes[nodeIndex];
-			if (node.name == "Machine_3549a31b-6b3a-4876-b8ff-9ced4db09e5d") {
+			std::shared_ptr<Scene::Node> sceneNode = std::make_shared<Scene::Node>();
+			sceneNode->guid = node.name;
+			sceneNode->localMatrix = GetLocalMatrix(node);
+			sceneNode->globalMatrix = _worldMatrices[nodeIndex];
 
+			if (node.mesh >= 0) {
+				tinygltf::Mesh mesh = model.meshes[node.mesh];
+				auto nodeModel = CreateModel(model, mesh);
+				sceneNode->model = nodeModel;
 			}
-			else {
-				std::shared_ptr<Scene::Node> sceneNode = std::make_shared<Scene::Node>();
-				sceneNode->localMatrix = GetLocalMatrix(node);
-				sceneNode->globalMatrix = _worldMatrices[nodeIndex];
-
-				if (node.mesh >= 0) {
-					tinygltf::Mesh mesh = model.meshes[node.mesh];
-					auto nodeModel = CreateModel(model, mesh);
-					sceneNode->model = nodeModel;
-				}
-				parentNode->children.push_back(sceneNode);
-				for (auto child : node.children) {
-					AnalysisModel(model, child, sceneNode);
-				}
+			parentNode->children.push_back(sceneNode);
+			for (auto child : node.children) {
+				AnalysisModel(model, child, sceneNode);
 			}
 		}
 		/// <summary>
@@ -208,7 +239,7 @@ namespace Bim
 			std::shared_ptr<Robot::Robot> robot = std::make_shared<Robot::Robot>();
 			return robot;
 		}
-		void CreateRobot(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Robot>& robot) {
+		void GltfFileHandle::CreateRobot(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Robot>& robot) {
 			auto node = model.nodes[nodeIndex];
 			if (node.name.find("Baseframe") != std::string::npos ||
 				node.name.find("J1") != std::string::npos ||
@@ -228,7 +259,7 @@ namespace Bim
 				CreateRobot(model, node.children[0], robot);
 			}
 		}
-		void CreateLink(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Link>& link) {
+		void GltfFileHandle::CreateLink(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Link>& link) {
 			auto node = model.nodes[nodeIndex];
 			if (node.mesh > 0) {
 				auto nodeModel = CreateModel(model, model.meshes[node.mesh]);
@@ -240,13 +271,10 @@ namespace Bim
 				CreateLink(model, child, link);
 			}
 		}
-		std::shared_ptr<Graphics::Model> CreateModel(const tinygltf::Model& model, const tinygltf::Mesh& mesh) {
+		std::shared_ptr<Graphics::Model> GltfFileHandle::CreateModel(const tinygltf::Model& model, const tinygltf::Mesh& mesh) {
 			std::shared_ptr<Graphics::Model> nodeModel = std::make_shared<Graphics::Model>();
 			for (const auto& prim : mesh.primitives) {
 				std::shared_ptr<Graphics::Mesh> modelMesh = std::make_shared<Graphics::Mesh>();
-
-				//线模型去掉
-				if (prim.mode == TINYGLTF_MODE_LINE) continue;
 				//获取顶点位置
 				std::vector<float> positions;
 				auto accessorIndex = prim.attributes.find("POSITION");
@@ -267,7 +295,6 @@ namespace Bim
 						}
 					}
 				}
-
 				//获取索引
 				std::vector<unsigned int> indices;
 				if (prim.indices >= 0) {
@@ -348,9 +375,32 @@ namespace Bim
 						}
 					}
 				}
+				//获取颜色
+				std::vector<float> colors;
+				auto colorAccessorIndex = prim.attributes.find("COLOR_0");
+				if (colorAccessorIndex != prim.attributes.end())
+				{
+					const tinygltf::Accessor& accessor = model.accessors[colorAccessorIndex->second];
+					const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = model.buffers[view.buffer];
+					const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+					size_t count = accessor.count;
+					size_t stride = accessor.ByteStride(view);
+					if (stride == 0) {
+						stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
+					}
+					for (size_t i = 0; i < count; ++i) {
+						const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
+						for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
+							colors.push_back(src[j]);
+						}
+					}
+				}
+
 				modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
 				modelMesh->indices.insert(modelMesh->indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
 				modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
+				modelMesh->colors.insert(modelMesh->colors.end(), std::make_move_iterator(colors.begin()), std::make_move_iterator(colors.end()));
 
 				nodeModel->meshes.push_back(modelMesh);
 				return nodeModel;

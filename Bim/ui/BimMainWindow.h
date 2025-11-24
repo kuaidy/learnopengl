@@ -35,9 +35,10 @@ public:
 	~BimMainWindow();
 	void OpenModule(string path);
 	std::shared_ptr<FileLoader> file_loader;
-	vsg::ref_ptr<vsg::StateGroup> CreateNodeFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh);
+	vsg::ref_ptr<vsg::StateGroup> CreateNodeFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh,const std::string& guid);
 	void ShowScene(const std::shared_ptr<Bim::Scene::Node>& node);
 	vsg::ref_ptr<vsg::StateGroup> CreateGeometryFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh);
+	vsg::ref_ptr<vsg::MatrixTransform> FindTransformByGuid(vsg::Node* rootNode, const std::string& guid);
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);
@@ -65,5 +66,7 @@ private:
 	vsg::ref_ptr<vsgQt::Viewer> m_vsgViewer;
 	vsg::ref_ptr<vsg::ShaderStage> m_vertexShader;
 	vsg::ref_ptr<vsg::ShaderStage> m_fragmentShader;
-};
 
+	QTimer* m_animationTimer = nullptr;
+	vsg::ref_ptr<vsg::MatrixTransform> m_targetTransform;
+};

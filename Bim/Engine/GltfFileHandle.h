@@ -30,6 +30,9 @@ namespace Bim
 			void GetNodeMatrix(const tinygltf::Model& model);
 			//std::unordered_map<int, std::shared_ptr<Graphics::Mesh>> GetNodeMeshDatas();
 			std::shared_ptr<Robot::Robot> CreateRobotFromGltfNode(const tinygltf::Model& model, int nodeIndex);
+			std::shared_ptr<Graphics::Model> CreateModel(const tinygltf::Model& model, const tinygltf::Mesh& mesh);
+			void CreateRobot(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Robot>& robot);
+			void CreateLink(const tinygltf::Model& model, int nodeIndex, const std::shared_ptr<Robot::Link>& link);
 		private:
 			std::vector<std::shared_ptr<Graphics::Mesh>> _meshDatas;
 			tinygltf::Model _model;
