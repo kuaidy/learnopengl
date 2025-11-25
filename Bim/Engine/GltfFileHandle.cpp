@@ -27,39 +27,6 @@ namespace Bim
 			_model = model;
 			GetNodeMatrix(model);
 
-			for (const tinygltf::Node& node : model.nodes)
-			{
-				nlohmann::json root;
-				//构建普通节点
-				nlohmann::json snode;
-				snode["type"] = "SNode";
-				snode["localMatrix"] = node.matrix;
-				snode["component"] = nlohmann::json::array();
-				snode["component"].push_back(node.name);
-				snode["childArr"] = nlohmann::json::array();
-
-				nlohmann::json groupNode;
-				groupNode["type"] = "DGroup";
-				groupNode["childAttr"] = nlohmann::json::array();
-
-				nlohmann::json dNode;
-				dNode["type"] = "DNode";
-				dNode["name"] = "label";
-				dNode["parentArr"] = nlohmann::json::array();
-
-				groupNode["parent"] = dNode;
-
-				snode["parent"] = groupNode;
-
-				root["nodes"] = nlohmann::json::array();
-				root["nodes"].push_back(snode);
-
-				//构建机构节点
-
-
-			}
-
-
 			const tinygltf::Scene& scene = model.scenes[model.defaultScene];
 
 			auto& ctx = Engine::GetGlobalContext();

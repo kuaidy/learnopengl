@@ -55,6 +55,7 @@ BimMainWindow::BimMainWindow(QWidget* parent,
 	connect(editAction, &QAction::triggered, this, &BimMainWindow::on_menu_edit_triggered);
 	menuBar()->addAction(editAction);
 
+	InitGraphicsPipeline();
 }
 
 BimMainWindow::~BimMainWindow()
@@ -95,26 +96,23 @@ void BimMainWindow::on_fileopen_triggered() {
 	gltfFileHandle.ReadFile(fileName.toStdString());
 
 	auto& ctx = Bim::Engine::GetGlobalContext();
-	ShowScene(ctx.scene);
-
+	ShowScene(ctx.scene,m_vsgScene);
 	m_vsgViewer->compile();
-
 	//移动模型
+	//m_targetTransform = FindTransformByGuid(m_vsgScene, "Transform_Object_2");
+	//if (m_targetTransform)
+	//{
+	//	// 创建并启动动画定时器（例如每 50ms 更新一次 ≈ 20 FPS）
+	//	m_animationTimer = new QTimer(this);
+	//	connect(m_animationTimer, &QTimer::timeout, this, [this]()
+	//		{
+	//			static double x = 0.0;
+	//			x += 0.1; // 每次向右移动 0.1 单位
+	//			m_targetTransform->matrix = vsg::translate(x, 0.0, 0.0);
+	//		});
+	//	m_animationTimer->start(20); // 50 毫秒间隔
+	//}
 
-	
-	m_targetTransform = FindTransformByGuid(m_vsgScene, "Transform_Object_2");
-	if (m_targetTransform)
-	{
-		// 创建并启动动画定时器（例如每 50ms 更新一次 ≈ 20 FPS）
-		m_animationTimer = new QTimer(this);
-		connect(m_animationTimer, &QTimer::timeout, this, [this]()
-			{
-				static double x = 0.0;
-				x += 0.1; // 每次向右移动 0.1 单位
-				m_targetTransform->matrix = vsg::translate(x, 0.0, 0.0);
-			});
-		m_animationTimer->start(20); // 50 毫秒间隔
-	}
 	/*auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
 	if (vsgNode) {
 		m_vsgScene->addChild(vsgNode);
@@ -244,7 +242,7 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 	//vsg::dvec3 centre = (computeBounds.bounds.min + computeBounds.bounds.max) * 0.5;
 	vsg::dvec3 center(0, 0, 0);
 	//double radius = vsg::length(computeBounds.bounds.max - computeBounds.bounds.min) * 0.6;
-	double radius = 100;
+	double radius = 3000;
 	double nearFarRatio = 0.1;
 
 	uint32_t width = window->traits->width;
@@ -332,69 +330,7 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::share
 	vid->instanceCount = 1;
 	vid->setValue("guid", guid);
 
-	m_vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/base.vert", m_vsgOptions);
-	m_fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/base.frag", m_vsgOptions);
 
-	if (!m_vertexShader || !m_fragmentShader) {
-		std::cerr << "Failed to load simple shaders!" << std::endl;
-		return nullptr;
-	}
-
-	//vsg::ref_ptr<vsg::ShaderStage> vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/vert_PushConstants.spv", m_vsgOptions);
-	//vsg::ref_ptr<vsg::ShaderStage> fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/frag_PushConstants.spv", m_vsgOptions);
-	//if (!vertexShader || !fragmentShader)
-	//{
-	//	std::cout << "Could not create shaders." << std::endl;
-	//	return {};
-	//}
-
-	// read texture image
-	//vsg::Path textureFile("textures/lz.vsgb");
-	//auto textureData = vsg::read_cast<vsg::Data>(textureFile, options);
-	//if (!textureData)
-	//{
-	//	std::cout << "Could not read texture file : " << textureFile << std::endl;
-	//	return {};
-	//}
-
-	// set up graphics pipeline
-	//vsg::DescriptorSetLayoutBindings descriptorBindings{
-	//	{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}, // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
-	//	{1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}            // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
-	//};
-
-	//auto descriptorSetLayout = vsg::DescriptorSetLayout::create(descriptorBindings);
-
-	vsg::PushConstantRanges pushConstantRanges{
-		{VK_SHADER_STAGE_VERTEX_BIT, 0, 128} // projection, view and model matrices, actual push constant calls automatically provided by the VSG's RecordTraversal
-	};
-
-	vsg::VertexInputState::Bindings vertexBindingsDescriptions{
-		VkVertexInputBindingDescription{0, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // vertex data
-		//VkVertexInputBindingDescription{1, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // colour data
-		//VkVertexInputBindingDescription{2, sizeof(vsg::vec2), VK_VERTEX_INPUT_RATE_VERTEX}  // tex coord data
-	};
-
-	vsg::VertexInputState::Attributes vertexAttributeDescriptions{
-		VkVertexInputAttributeDescription{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0}, // vertex data
-		//VkVertexInputAttributeDescription{1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0}, // colour data
-		//VkVertexInputAttributeDescription{2, 2, VK_FORMAT_R32G32_SFLOAT, 0},    // tex coord data
-	};
-
-	auto rasterizationState = vsg::RasterizationState::create();
-	rasterizationState->cullMode = VK_CULL_MODE_NONE;
-
-	vsg::GraphicsPipelineStates pipelineStates{
-		vsg::VertexInputState::create(vertexBindingsDescriptions, vertexAttributeDescriptions),
-		vsg::InputAssemblyState::create(),
-		rasterizationState,
-		vsg::MultisampleState::create(),
-		vsg::ColorBlendState::create(),
-		vsg::DepthStencilState::create() };
-
-	auto pipelineLayout = vsg::PipelineLayout::create(vsg::DescriptorSetLayouts{ }, pushConstantRanges);
-	auto graphicsPipeline = vsg::GraphicsPipeline::create(pipelineLayout, vsg::ShaderStages{ m_vertexShader, m_fragmentShader }, pipelineStates);
-	auto bindGraphicsPipeline = vsg::BindGraphicsPipeline::create(graphicsPipeline);
 
 	// create texture image and associated DescriptorSets and binding
 	//auto texture = vsg::DescriptorImage::create(vsg::Sampler::create(), textureData, 0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
@@ -407,7 +343,7 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::share
 
 	// create StateGroup as the root of the scene/command graph to hold the GraphicsPipeline, and binding of Descriptors to decorate the whole graph
 	auto scenegraph = vsg::StateGroup::create();
-	scenegraph->add(bindGraphicsPipeline);
+	scenegraph->add(m_bindGraphicsPipeline);
 	//scenegraph->add(bindDescriptorSets);
 
 	// set up model transformation node
@@ -427,18 +363,23 @@ vsg::ref_ptr<vsg::StateGroup> BimMainWindow::CreateNodeFromMesh(const std::share
 	return scenegraph;
 }
 
-void BimMainWindow::ShowScene(const std::shared_ptr<Bim::Scene::Node>& node)
+void BimMainWindow::ShowScene(const std::shared_ptr<Bim::Scene::Node>& node, const vsg::ref_ptr<vsg::Group>& parentGroup)
 {
-	if (node->model) {
-		for (const auto& mesh : node->model->meshes) {
-			auto vsgNode = CreateNodeFromMesh(mesh, node->guid);
-			if (vsgNode) {
-				m_vsgScene->addChild(vsgNode);
-			}
-		}
+	//if (node->model) {
+	//	for (const auto& mesh : node->model->meshes) {
+	//		auto vsgNode = CreateNodeFromMesh(mesh, node->guid);
+	//		if (vsgNode) {
+	//			m_vsgScene->addChild(vsgNode);
+	//		}
+	//	}
+	//}
+	auto vsgNode = CreateVsgNodeFromSceneNode(node);
+	if (vsgNode)
+	{
+		parentGroup->addChild(vsgNode);
 	}
 	for (const auto& node : node->children) {
-		ShowScene(node);
+		ShowScene(node, vsgNode);
 	}
 }
 
@@ -561,5 +502,145 @@ vsg::ref_ptr<vsg::MatrixTransform> BimMainWindow::FindTransformByGuid(vsg::Node*
 	Visitor visitor(guid);
 	rootNode->accept(visitor);
 	return visitor.found;
+}
+
+/// <summary>
+/// 初始化渲染管线
+/// </summary>
+void BimMainWindow::InitGraphicsPipeline()
+{
+	auto vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/base.vert", m_vsgOptions);
+	auto fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/base.frag", m_vsgOptions);
+
+	if (!vertexShader || !fragmentShader) {
+		std::cerr << "Failed to load simple shaders!" << std::endl;
+		return;
+	}
+
+	//vsg::ref_ptr<vsg::ShaderStage> vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/vert_PushConstants.spv", m_vsgOptions);
+	//vsg::ref_ptr<vsg::ShaderStage> fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/frag_PushConstants.spv", m_vsgOptions);
+	//if (!vertexShader || !fragmentShader)
+	//{
+	//	std::cout << "Could not create shaders." << std::endl;
+	//	return {};
+	//}
+
+	// read texture image
+	//vsg::Path textureFile("textures/lz.vsgb");
+	//auto textureData = vsg::read_cast<vsg::Data>(textureFile, options);
+	//if (!textureData)
+	//{
+	//	std::cout << "Could not read texture file : " << textureFile << std::endl;
+	//	return {};
+	//}
+
+	// set up graphics pipeline
+	//vsg::DescriptorSetLayoutBindings descriptorBindings{
+	//	{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}, // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
+	//	{1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}            // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
+	//};
+
+	//auto descriptorSetLayout = vsg::DescriptorSetLayout::create(descriptorBindings);
+
+	vsg::PushConstantRanges pushConstantRanges{
+		{VK_SHADER_STAGE_VERTEX_BIT, 0, 128} // projection, view and model matrices, actual push constant calls automatically provided by the VSG's RecordTraversal
+	};
+
+	vsg::VertexInputState::Bindings vertexBindingsDescriptions{
+		VkVertexInputBindingDescription{0, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // vertex data
+		//VkVertexInputBindingDescription{1, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // colour data
+		//VkVertexInputBindingDescription{2, sizeof(vsg::vec2), VK_VERTEX_INPUT_RATE_VERTEX}  // tex coord data
+	};
+
+	vsg::VertexInputState::Attributes vertexAttributeDescriptions{
+		VkVertexInputAttributeDescription{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0}, // vertex data
+		//VkVertexInputAttributeDescription{1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0}, // colour data
+		//VkVertexInputAttributeDescription{2, 2, VK_FORMAT_R32G32_SFLOAT, 0},    // tex coord data
+	};
+
+	auto rasterizationState = vsg::RasterizationState::create();
+	rasterizationState->cullMode = VK_CULL_MODE_NONE;
+
+	vsg::GraphicsPipelineStates pipelineStates{
+		vsg::VertexInputState::create(vertexBindingsDescriptions, vertexAttributeDescriptions),
+		vsg::InputAssemblyState::create(),
+		rasterizationState,
+		vsg::MultisampleState::create(),
+		vsg::ColorBlendState::create(),
+		vsg::DepthStencilState::create() };
+
+	auto pipelineLayout = vsg::PipelineLayout::create(vsg::DescriptorSetLayouts{ }, pushConstantRanges);
+	auto graphicsPipeline = vsg::GraphicsPipeline::create(pipelineLayout, vsg::ShaderStages{ vertexShader, fragmentShader }, pipelineStates);
+	m_bindGraphicsPipeline = vsg::BindGraphicsPipeline::create(graphicsPipeline);
+}
+/// <summary>
+/// 从场景节点创建VSG节点
+/// </summary>
+/// <param name="node"></param>
+/// <returns></returns>
+vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNode(const std::shared_ptr<Bim::Scene::Node>& node)
+{
+	auto transform = vsg::MatrixTransform::create();
+	transform->setValue("guid", "Transform_" + node->guid);
+	if (node->localMatrix.isZero()) 
+	{
+		transform->matrix = vsg::dmat4(); // 单位阵
+	}
+	else 
+	{
+		transform->matrix = vsg::dmat4(node->localMatrix.data());
+	}
+	if (node->model)
+	{
+		auto group = vsg::Group::create();
+		group->setValue("guid", node->guid);
+		for (auto& mesh : node->model->meshes)
+		{
+			if (mesh) {
+				if (!mesh) {
+					return nullptr;
+				}
+				if (mesh->vertices.empty()) {
+					std::cerr << "警告: 顶点数据为空" << std::endl;
+					return nullptr;
+				}
+				if (mesh->vertices.size() % 3 != 0) {
+					std::cerr << "错误: 顶点数据大小不是 3 的倍数" << std::endl;
+					return nullptr;
+				}
+				if (mesh->indices.empty()) {
+					std::cerr << "警告: 索引数据为空" << std::endl;
+					return nullptr;
+				}
+				// 安全前提
+				static_assert(sizeof(vsg::vec3) == 3 * sizeof(float));
+				size_t numVertices = mesh->vertices.size() / 3;
+				auto vertices = vsg::vec3Array::create(numVertices);
+				std::memcpy(vertices->data(), mesh->vertices.data(), mesh->vertices.size() * sizeof(float));
+
+				vsg::ref_ptr<vsg::vec3Array> normals = nullptr;
+				if (!mesh->normals.empty()) {
+					size_t numNormals = mesh->normals.size() / 3;
+					auto normals = vsg::vec3Array::create(numNormals);
+					std::memcpy(normals->data(), mesh->normals.data(), mesh->normals.size() * sizeof(float));
+				}
+
+				auto indices = vsg::uintArray::create(mesh->indices.size());
+				std::copy(mesh->indices.begin(), mesh->indices.end(), indices->begin());
+
+				auto vid = vsg::VertexIndexDraw::create();
+				vid->assignArrays(vsg::DataList{ vertices });
+				vid->assignIndices(indices);
+				vid->indexCount = static_cast<uint32_t>(indices->size());
+				vid->instanceCount = 1;
+				auto stateGroup = vsg::StateGroup::create();
+				stateGroup->add(m_bindGraphicsPipeline);
+				stateGroup->addChild(vid);
+				group->addChild(stateGroup);
+			}
+		}
+		transform->addChild(group);
+	}
+	return transform;
 }
 
