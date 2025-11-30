@@ -95,12 +95,12 @@ void BimMainWindow::on_fileopen_triggered() {
 	//// 重新编译
 	//m_vsgViewer->compile();
 
-	//Bim::Engine::GltfFileHandle gltfFileHandle;
-	//gltfFileHandle.ReadFile(fileName.toStdString());
+	Bim::Engine::GltfFileHandle gltfFileHandle;
+	gltfFileHandle.ReadFile(fileName.toStdString());
 
-	//auto& ctx = Bim::Engine::GetGlobalContext();
-	//ShowScene(ctx.scene, m_vsgScene);
-	//m_vsgViewer->compile();
+	auto& ctx = Bim::Engine::GetGlobalContext();
+	ShowScene(ctx.scene, m_vsgScene);
+	m_vsgViewer->compile();
 	//移动模型
 	//m_targetTransform = FindTransformByGuid(m_vsgScene, "Transform_Object_2");
 	//if (m_targetTransform)
@@ -116,11 +116,11 @@ void BimMainWindow::on_fileopen_triggered() {
 	//	m_animationTimer->start(20); // 50 毫秒间隔
 	//}
 
-	auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
-	if (vsgNode) {
-		m_vsgScene->addChild(vsgNode);
-		m_vsgViewer->compile();
-	}
+	//auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
+	//if (vsgNode) {
+	//	m_vsgScene->addChild(vsgNode);
+	//	m_vsgViewer->compile();
+	//}
 	//file_loader = FileLoadFactory::Create(fileName.toStdString());
 	//file_loader->Load(fileName.toStdString());
 	//m_MyOpenGlWidget->file_loader = file_loader;
@@ -771,9 +771,9 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNodeByPhong(const 
 				}
 				vsg::DataList vertexArrays;
 				graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Vertex", VK_VERTEX_INPUT_RATE_VERTEX, vertices);
-				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Normal", VK_VERTEX_INPUT_RATE_VERTEX, normals);
+				graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Normal", VK_VERTEX_INPUT_RATE_VERTEX, normals);
 				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_TexCoord0", VK_VERTEX_INPUT_RATE_VERTEX, texcoords);
-				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Color", VK_VERTEX_INPUT_RATE_INSTANCE, colors);
+				graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Color", VK_VERTEX_INPUT_RATE_INSTANCE, colors);
 
 				//索引
 				auto indices = vsg::uintArray::create(mesh->indices.size());

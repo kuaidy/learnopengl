@@ -6,7 +6,7 @@ namespace Bim
 {
 	namespace Engine {
 
-        constexpr float QUANTIZATION_SCALE = 100000.0f;
+        constexpr float QUANTIZATION_SCALE = 1000000.0;
 
         struct QuantizedVertex {
             int x, y, z;

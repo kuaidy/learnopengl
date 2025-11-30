@@ -318,8 +318,8 @@ namespace Bim
 							indices.push_back(newIndex);
 						}
 					}
-					/*positions.clear();
-					positions = tmpPositions;*/
+					positions.clear();
+					positions = tmpPositions;
 				}
 				//得到世界坐标
 				//std::vector<float> worldPositions = GetWorldPositions(positions, nodeIndex);
