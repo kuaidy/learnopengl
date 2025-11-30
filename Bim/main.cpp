@@ -6,7 +6,7 @@
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
-
+	vsg::Logger::instance()->level = vsg::Logger::LOGGER_DEBUG;
 	//#ifdef Q_OS_WIN
 	//	QFont font("Microsoft YaHei");
 	//#elif defined(Q_OS_MAC)

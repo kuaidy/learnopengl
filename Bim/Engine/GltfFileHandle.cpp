@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "../Graphics/Point.h"
 #include "../json.hpp"
+#include "../Graphics/Geometry.h"
 
 namespace Bim
 {
@@ -241,6 +242,7 @@ namespace Bim
 		std::shared_ptr<Graphics::Model> GltfFileHandle::CreateModel(const tinygltf::Model& model, const tinygltf::Mesh& mesh) {
 			std::shared_ptr<Graphics::Model> nodeModel = std::make_shared<Graphics::Model>();
 			for (const auto& prim : mesh.primitives) {
+				std::shared_ptr<Graphics::Geometry> geometry = std::make_shared<Graphics::Geometry>();
 				std::shared_ptr<Graphics::Mesh> modelMesh = std::make_shared<Graphics::Mesh>();
 				//获取顶点位置
 				std::vector<float> positions;
@@ -316,8 +318,8 @@ namespace Bim
 							indices.push_back(newIndex);
 						}
 					}
-					positions.clear();
-					positions = tmpPositions;
+					/*positions.clear();
+					positions = tmpPositions;*/
 				}
 				//得到世界坐标
 				//std::vector<float> worldPositions = GetWorldPositions(positions, nodeIndex);
@@ -342,6 +344,17 @@ namespace Bim
 						}
 					}
 				}
+				//如果没有法向量，使用默认值
+				if (normals.empty())
+				{
+					for (size_t i = 0; i < positions.size() / 3; ++i)
+					{
+						normals.push_back(0.0f);
+						normals.push_back(0.0f);
+						normals.push_back(1.0f);
+					};
+				}
+
 				//获取颜色
 				std::vector<float> colors;
 				auto colorAccessorIndex = prim.attributes.find("COLOR_0");
@@ -363,15 +376,48 @@ namespace Bim
 						}
 					}
 				}
+				//如果没有颜色，设置默认白色
+				if (colors.empty())
+				{
+					for (size_t i = 0; i < positions.size() / 3; ++i)
+					{
+						colors.push_back(1.0f); // R
+						colors.push_back(1.0f); // G
+						colors.push_back(1.0f); // B
+						colors.push_back(1.0f); // A
+					}
+				}
+
+				//获取材质
+				int materialIndex = prim.material; // 这里就是材质索引
+				if (materialIndex >= 0)
+				{
+					std::shared_ptr<Graphics::Material> modelMaterial = std::make_shared<Graphics::Material>();
+					const auto& material = model.materials[materialIndex];
+					// 访问 baseColorFactor、metallicFactor、roughnessFactor
+					const auto& pbr = material.pbrMetallicRoughness;
+					Eigen::Vector4d baseColor;
+					if (pbr.baseColorFactor.size() == 4)
+					{
+						baseColor = Eigen::Vector4d(
+							pbr.baseColorFactor[0],
+							pbr.baseColorFactor[1],
+							pbr.baseColorFactor[2],
+							pbr.baseColorFactor[3]
+						);
+					}
+					modelMaterial->baseColorFactor = baseColor;
+					geometry->material = modelMaterial;
+				}
 
 				modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
 				modelMesh->indices.insert(modelMesh->indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
 				modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
 				modelMesh->colors.insert(modelMesh->colors.end(), std::make_move_iterator(colors.begin()), std::make_move_iterator(colors.end()));
-
-				nodeModel->meshes.push_back(modelMesh);
-				return nodeModel;
+				geometry->mesh = modelMesh;
+				nodeModel->geometries.push_back(geometry);
 			}
+			return nodeModel;
 		}
 	}
 }

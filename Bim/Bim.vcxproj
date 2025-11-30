@@ -84,7 +84,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -172,9 +172,12 @@
     <ClInclude Include="FileLoadFactory.h" />
     <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="Commands\ICommand.h" />
+    <ClInclude Include="Graphics\Geometry.h" />
+    <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Graphics\Point.h" />
+    <ClInclude Include="Graphics\TextureInfo.h" />
     <ClInclude Include="IfcLoader.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="json.hpp" />

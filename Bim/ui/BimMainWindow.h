@@ -41,6 +41,8 @@ public:
 	vsg::ref_ptr<vsg::StateGroup> CreateGeometryFromMesh(const std::shared_ptr<Bim::Graphics::Mesh>& mesh);
 	vsg::ref_ptr<vsg::MatrixTransform> FindTransformByGuid(vsg::Node* rootNode, const std::string& guid);
 	void InitGraphicsPipeline();
+	//void InitPhongShaderset();
+	vsg::ref_ptr<vsg::Group> CreateVsgNodeFromSceneNodeByPhong(const std::shared_ptr<Bim::Scene::Node>& node);
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);

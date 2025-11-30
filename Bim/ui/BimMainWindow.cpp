@@ -24,6 +24,9 @@ BimMainWindow::BimMainWindow(QWidget* parent,
 
 	auto windowTraits = vsg::WindowTraits::create();
 	windowTraits->windowTitle = "vsgQt viewer";
+	windowTraits->swapchainPreferences.imageCount = 2; // 最少双缓冲
+	windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_FIFO_KHR; // 避免 tear
+	windowTraits->depthFormat = VK_FORMAT_D32_SFLOAT;
 	//m_vsgScene = vsg::read_cast<vsg::Node>("C:/Users/kdyonly/Desktop/555.gltf",options);
 	m_vsgScene = vsg::Group::create();
 	if (!m_vsgScene)
@@ -92,12 +95,12 @@ void BimMainWindow::on_fileopen_triggered() {
 	//// 重新编译
 	//m_vsgViewer->compile();
 
-	Bim::Engine::GltfFileHandle gltfFileHandle;
-	gltfFileHandle.ReadFile(fileName.toStdString());
+	//Bim::Engine::GltfFileHandle gltfFileHandle;
+	//gltfFileHandle.ReadFile(fileName.toStdString());
 
-	auto& ctx = Bim::Engine::GetGlobalContext();
-	ShowScene(ctx.scene,m_vsgScene);
-	m_vsgViewer->compile();
+	//auto& ctx = Bim::Engine::GetGlobalContext();
+	//ShowScene(ctx.scene, m_vsgScene);
+	//m_vsgViewer->compile();
 	//移动模型
 	//m_targetTransform = FindTransformByGuid(m_vsgScene, "Transform_Object_2");
 	//if (m_targetTransform)
@@ -113,11 +116,11 @@ void BimMainWindow::on_fileopen_triggered() {
 	//	m_animationTimer->start(20); // 50 毫秒间隔
 	//}
 
-	/*auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
+	auto vsgNode = vsg::read_cast<vsg::Node>(fileName.toStdString(), m_vsgOptions);
 	if (vsgNode) {
 		m_vsgScene->addChild(vsgNode);
 		m_vsgViewer->compile();
-	}*/
+	}
 	//file_loader = FileLoadFactory::Create(fileName.toStdString());
 	//file_loader->Load(fileName.toStdString());
 	//m_MyOpenGlWidget->file_loader = file_loader;
@@ -243,7 +246,8 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 	vsg::dvec3 center(0, 0, 0);
 	//double radius = vsg::length(computeBounds.bounds.max - computeBounds.bounds.min) * 0.6;
 	double radius = 3000;
-	double nearFarRatio = 0.1;
+	double nearPlane = 0.1;
+	double farPlane = 50000;
 
 	uint32_t width = window->traits->width;
 	uint32_t height = window->traits->height;
@@ -269,7 +273,7 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 				30.0,
 				static_cast<double>(width) /
 				static_cast<double>(height),
-				nearFarRatio, radius * 4.5);
+				nearPlane, farPlane);
 		}
 
 		camera = vsg::Camera::create(perspective, lookAt, vsg::ViewportState::create(VkExtent2D{ width, height }));
@@ -281,8 +285,15 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 
 	viewer->addEventHandler(trackball);
 
-	auto commandGraph = vsg::createCommandGraphForView(*window, camera, vsg_scene);
+	auto renderGraph = vsg::RenderGraph::create(window->windowAdapter);
+	VkClearValue colorClear{};
+	colorClear.color = { {0.2f, 0.2f, 0.2f, 1.0f} };
+	VkClearValue depthClear{};
+	depthClear.depthStencil = { 1.0f, 0 };  // 深度 = 1.0
+	renderGraph->clearValues = { colorClear };
 
+	auto commandGraph = vsg::createCommandGraphForView(*window, camera, vsg_scene);
+	//commandGraph->addChild(renderGraph);
 	viewer->addRecordAndSubmitTaskAndPresentation({ commandGraph });
 
 	return window;
@@ -373,13 +384,14 @@ void BimMainWindow::ShowScene(const std::shared_ptr<Bim::Scene::Node>& node, con
 	//		}
 	//	}
 	//}
-	auto vsgNode = CreateVsgNodeFromSceneNode(node);
+	//auto vsgNode = CreateVsgNodeFromSceneNode(node);
+	auto vsgNode = CreateVsgNodeFromSceneNodeByPhong(node);
 	if (vsgNode)
 	{
 		parentGroup->addChild(vsgNode);
 	}
-	for (const auto& node : node->children) {
-		ShowScene(node, vsgNode);
+	for (const auto& childNode : node->children) {
+		ShowScene(childNode, vsgNode);
 	}
 }
 
@@ -517,49 +529,31 @@ void BimMainWindow::InitGraphicsPipeline()
 		return;
 	}
 
-	//vsg::ref_ptr<vsg::ShaderStage> vertexShader = vsg::ShaderStage::read(VK_SHADER_STAGE_VERTEX_BIT, "main", "Shaders/vert_PushConstants.spv", m_vsgOptions);
-	//vsg::ref_ptr<vsg::ShaderStage> fragmentShader = vsg::ShaderStage::read(VK_SHADER_STAGE_FRAGMENT_BIT, "main", "Shaders/frag_PushConstants.spv", m_vsgOptions);
-	//if (!vertexShader || !fragmentShader)
-	//{
-	//	std::cout << "Could not create shaders." << std::endl;
-	//	return {};
-	//}
-
-	// read texture image
-	//vsg::Path textureFile("textures/lz.vsgb");
-	//auto textureData = vsg::read_cast<vsg::Data>(textureFile, options);
-	//if (!textureData)
-	//{
-	//	std::cout << "Could not read texture file : " << textureFile << std::endl;
-	//	return {};
-	//}
-
-	// set up graphics pipeline
-	//vsg::DescriptorSetLayoutBindings descriptorBindings{
-	//	{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}, // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
-	//	{1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}            // { binding, descriptorType, descriptorCount, stageFlags, pImmutableSamplers}
-	//};
-
-	//auto descriptorSetLayout = vsg::DescriptorSetLayout::create(descriptorBindings);
-
 	vsg::PushConstantRanges pushConstantRanges{
-		{VK_SHADER_STAGE_VERTEX_BIT, 0, 128} // projection, view and model matrices, actual push constant calls automatically provided by the VSG's RecordTraversal
+		{VK_SHADER_STAGE_VERTEX_BIT, 0, 128}
 	};
 
 	vsg::VertexInputState::Bindings vertexBindingsDescriptions{
 		VkVertexInputBindingDescription{0, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // vertex data
-		//VkVertexInputBindingDescription{1, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // colour data
-		//VkVertexInputBindingDescription{2, sizeof(vsg::vec2), VK_VERTEX_INPUT_RATE_VERTEX}  // tex coord data
+		VkVertexInputBindingDescription{1, sizeof(vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // normal data
+		VkVertexInputBindingDescription{2, sizeof(vsg::vec4), VK_VERTEX_INPUT_RATE_VERTEX}  // color data
 	};
 
 	vsg::VertexInputState::Attributes vertexAttributeDescriptions{
 		VkVertexInputAttributeDescription{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0}, // vertex data
-		//VkVertexInputAttributeDescription{1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0}, // colour data
-		//VkVertexInputAttributeDescription{2, 2, VK_FORMAT_R32G32_SFLOAT, 0},    // tex coord data
+		VkVertexInputAttributeDescription{1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0}, // normal data
+		VkVertexInputAttributeDescription{2, 2, VK_FORMAT_R32G32B32_SFLOAT, 0}, // color data
 	};
 
 	auto rasterizationState = vsg::RasterizationState::create();
 	rasterizationState->cullMode = VK_CULL_MODE_NONE;
+	//rasterizationState->cullMode = VK_CULL_MODE_NONE;
+	//rasterizationState->frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+
+	auto depth = vsg::DepthStencilState::create();
+	//depth->depthTestEnable = VK_TRUE;
+	//depth->depthWriteEnable = VK_TRUE;
+	//depth->depthCompareOp = VK_COMPARE_OP_LESS;
 
 	vsg::GraphicsPipelineStates pipelineStates{
 		vsg::VertexInputState::create(vertexBindingsDescriptions, vertexAttributeDescriptions),
@@ -567,7 +561,7 @@ void BimMainWindow::InitGraphicsPipeline()
 		rasterizationState,
 		vsg::MultisampleState::create(),
 		vsg::ColorBlendState::create(),
-		vsg::DepthStencilState::create() };
+		depth };
 
 	auto pipelineLayout = vsg::PipelineLayout::create(vsg::DescriptorSetLayouts{ }, pushConstantRanges);
 	auto graphicsPipeline = vsg::GraphicsPipeline::create(pipelineLayout, vsg::ShaderStages{ vertexShader, fragmentShader }, pipelineStates);
@@ -581,12 +575,13 @@ void BimMainWindow::InitGraphicsPipeline()
 vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNode(const std::shared_ptr<Bim::Scene::Node>& node)
 {
 	auto transform = vsg::MatrixTransform::create();
-	transform->setValue("guid", "Transform_" + node->guid);
-	if (node->localMatrix.isZero()) 
+	auto guidValue = vsg::Value<std::string>::create(std::string("Transform_") + node->guid);
+	transform->setValue("guid", guidValue);
+	if (node->localMatrix.isZero())
 	{
 		transform->matrix = vsg::dmat4(); // 单位阵
 	}
-	else 
+	else
 	{
 		transform->matrix = vsg::dmat4(node->localMatrix.data());
 	}
@@ -594,48 +589,76 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNode(const std::sh
 	{
 		auto group = vsg::Group::create();
 		group->setValue("guid", node->guid);
-		for (auto& mesh : node->model->meshes)
+		for (auto& geometry : node->model->geometries)
 		{
-			if (mesh) {
-				if (!mesh) {
-					return nullptr;
-				}
+			if (geometry->mesh) {
+				auto& mesh = geometry->mesh;
 				if (mesh->vertices.empty()) {
 					std::cerr << "警告: 顶点数据为空" << std::endl;
-					return nullptr;
+					continue;
 				}
 				if (mesh->vertices.size() % 3 != 0) {
 					std::cerr << "错误: 顶点数据大小不是 3 的倍数" << std::endl;
-					return nullptr;
+					continue;
 				}
 				if (mesh->indices.empty()) {
 					std::cerr << "警告: 索引数据为空" << std::endl;
-					return nullptr;
+					continue;
 				}
-				// 安全前提
-				static_assert(sizeof(vsg::vec3) == 3 * sizeof(float));
+				//顶点
 				size_t numVertices = mesh->vertices.size() / 3;
+				if (numVertices < 3) continue;
 				auto vertices = vsg::vec3Array::create(numVertices);
 				std::memcpy(vertices->data(), mesh->vertices.data(), mesh->vertices.size() * sizeof(float));
-
+				//法线
 				vsg::ref_ptr<vsg::vec3Array> normals = nullptr;
 				if (!mesh->normals.empty()) {
 					size_t numNormals = mesh->normals.size() / 3;
-					auto normals = vsg::vec3Array::create(numNormals);
+					normals = vsg::vec3Array::create(numNormals);
 					std::memcpy(normals->data(), mesh->normals.data(), mesh->normals.size() * sizeof(float));
 				}
-
+				//索引
 				auto indices = vsg::uintArray::create(mesh->indices.size());
 				std::copy(mesh->indices.begin(), mesh->indices.end(), indices->begin());
 
+				//顶点颜色
+				vsg::ref_ptr<vsg::vec4Array> colors = nullptr;
+				if (!mesh->colors.empty()) {
+					size_t numColors = mesh->colors.size() / 4;
+					colors = vsg::vec4Array::create(numColors);
+					std::memcpy(colors->data(), mesh->colors.data(), mesh->colors.size() * sizeof(float));
+				}
+
+				auto stateGroup = vsg::StateGroup::create();
+				stateGroup->add(m_bindGraphicsPipeline);
+
+				//材质
+				/*if (geometry->material)
+				{
+					vsg::vec4 color(static_cast<float>(geometry->material->baseColorFactor.x()),
+						static_cast<float>(geometry->material->baseColorFactor.y()),
+						static_cast<float>(geometry->material->baseColorFactor.z()),
+						static_cast<float>(geometry->material->baseColorFactor.w()));
+					auto colorData = vsg::vec4Value::create(color);
+					auto material = vsg::PushConstants::create(
+						VK_SHADER_STAGE_FRAGMENT_BIT,
+						0,
+						colorData
+					);
+					stateGroup->add(material);
+				}*/
+
+				vsg::DataList arrays{ vertices };
+				if (normals) arrays.push_back(normals);
+				if (colors) arrays.push_back(colors);
+
 				auto vid = vsg::VertexIndexDraw::create();
-				vid->assignArrays(vsg::DataList{ vertices });
+				vid->assignArrays(arrays);
 				vid->assignIndices(indices);
 				vid->indexCount = static_cast<uint32_t>(indices->size());
 				vid->instanceCount = 1;
-				auto stateGroup = vsg::StateGroup::create();
-				stateGroup->add(m_bindGraphicsPipeline);
 				stateGroup->addChild(vid);
+
 				group->addChild(stateGroup);
 			}
 		}
@@ -644,3 +667,165 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNode(const std::sh
 	return transform;
 }
 
+/// <summary>
+///	初始化Phong着色器集
+/// </summary>
+//void BimMainWindow::InitPhongShaderset()
+//{
+	//// 1. 内置 Phong Shader
+	//auto shaderSet = vsg::createPhongShaderSet(options);
+
+	//// 2. 材质
+	//auto material = vsg::PhongMaterial::create();
+	//material->diffuse = vsg::vec4(0.8f, 0.6f, 0.2f, 1.0f);
+	//material->ambient = vsg::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	//material->specular = vsg::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	//material->shininess = 32.0f;
+
+	//// 3. descriptor set
+	//auto descriptorSetLayout = shaderSet->descriptorSetLayouts.front();
+
+	//auto descriptorSet = vsg::DescriptorSet::create(
+	//	descriptorSetLayout,
+	//	{
+	//		vsg::DescriptorBuffer::create(material, 0)
+	//	}
+	//);
+
+	//// 4. pipeline layout
+	//auto pipelineLayout = vsg::PipelineLayout::create(
+	//	{ descriptorSetLayout },
+	//	shaderSet->pushConstantRanges
+	//);
+
+	//vsg::GraphicsPipelineConfig pipelineConfig(shaderSet);
+	//pipelineConfig.assignDescriptors = false;
+
+	//auto pipeline = pipelineConfig.createPipeline(pipelineLayout);
+
+	//// 5. state group
+	//auto stateGroup = vsg::StateGroup::create();
+	//stateGroup->add(pipeline);
+
+	//stateGroup->add(
+	//	vsg::BindDescriptorSet::create(
+	//		VK_PIPELINE_BIND_POINT_GRAPHICS,
+	//		pipelineLayout,
+	//		0,
+	//		descriptorSet
+	//	)
+	//);
+
+	//// 6. 添加geometry
+	//stateGroup->addChild(geometry);
+
+	//return stateGroup;
+//}
+
+
+/// <summary>
+/// 从场景节点创建VSG节点，使用vsg phone着色器
+/// </summary>
+/// <param name="node"></param>
+/// <returns></returns>
+vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNodeByPhong(const std::shared_ptr<Bim::Scene::Node>& node)
+{
+	auto scenegraph = vsg::Group::create();
+
+	auto sharedObjects = vsg::SharedObjects::create();
+
+	auto shaderSet = vsg::createPhongShaderSet(m_vsgOptions);
+	auto graphicsPipelineConfig = vsg::GraphicsPipelineConfigurator::create(shaderSet);
+
+	auto mat = vsg::PhongMaterialValue::create();
+	mat->value().diffuse.set(1.0f, 1.0f, 1.0f, 1.0f);
+	mat->value().specular.set(1.0f, 0.0f, 0.0f, 1.0f); // red specular highlight
+	graphicsPipelineConfig->assignDescriptor("material", mat);
+	
+	
+	if (node->model)
+	{
+		for (auto& geometry : node->model->geometries)
+		{
+			if (geometry->mesh)
+			{
+				auto& mesh = geometry->mesh;
+				//顶点
+				static_assert(sizeof(vsg::vec3) == 3 * sizeof(float));
+				size_t numVertices = mesh->vertices.size() / 3;
+				auto vertices = vsg::vec3Array::create(numVertices);
+				std::memcpy(vertices->data(), mesh->vertices.data(), mesh->vertices.size() * sizeof(float));
+				//法向量
+				vsg::ref_ptr<vsg::vec3Array> normals = nullptr;
+				if (!mesh->normals.empty()) {
+					size_t numNormals = mesh->normals.size() / 3;
+					normals = vsg::vec3Array::create(numNormals);
+					std::memcpy(normals->data(), mesh->normals.data(), mesh->normals.size() * sizeof(float));
+				}
+				//顶点颜色
+				vsg::ref_ptr<vsg::vec4Array> colors = nullptr;
+				if (!mesh->colors.empty()) {
+					size_t numColors = mesh->colors.size() / 4;
+					colors = vsg::vec4Array::create(numColors);
+					std::memcpy(colors->data(), mesh->colors.data(), mesh->colors.size() * sizeof(float));
+				}
+				vsg::DataList vertexArrays;
+				graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Vertex", VK_VERTEX_INPUT_RATE_VERTEX, vertices);
+				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Normal", VK_VERTEX_INPUT_RATE_VERTEX, normals);
+				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_TexCoord0", VK_VERTEX_INPUT_RATE_VERTEX, texcoords);
+				//graphicsPipelineConfig->assignArray(vertexArrays, "vsg_Color", VK_VERTEX_INPUT_RATE_INSTANCE, colors);
+
+				//索引
+				auto indices = vsg::uintArray::create(mesh->indices.size());
+				std::copy(mesh->indices.begin(), mesh->indices.end(), indices->begin());
+
+				// setup geometry
+				auto drawCommands = vsg::Commands::create();
+				drawCommands->addChild(vsg::BindVertexBuffers::create(graphicsPipelineConfig->baseAttributeBinding, vertexArrays));
+				drawCommands->addChild(vsg::BindIndexBuffer::create(indices));
+				drawCommands->addChild(vsg::DrawIndexed::create(indices->size(), 1, 0, 0, 0));
+
+				if (sharedObjects) sharedObjects->share(vertexArrays);
+				if (sharedObjects) sharedObjects->share(indices);
+
+				if (sharedObjects)
+				{
+					sharedObjects->share(drawCommands->children);
+					sharedObjects->share(drawCommands);
+				}
+				// share the pipeline config and initialize it if it's unique
+				if (sharedObjects)
+					sharedObjects->share(graphicsPipelineConfig, [](auto gpc) { gpc->init(); });
+				else
+					graphicsPipelineConfig->init();
+				auto stateGroup = vsg::StateGroup::create();
+				graphicsPipelineConfig->copyTo(stateGroup, sharedObjects);
+				// set up model transformation node
+				/*auto transform = vsg::MatrixTransform::create();
+				transform->subgraphRequiresLocalFrustum = false;*/
+				auto transform = vsg::MatrixTransform::create();
+				transform->setValue("guid", "Transform_" + node->guid);
+				if (node->localMatrix.isZero())
+				{
+					transform->matrix = vsg::dmat4(); // 单位阵
+				}
+				else
+				{
+					transform->matrix = vsg::dmat4(node->localMatrix.data());
+				}
+				stateGroup->addChild(drawCommands);
+				if (sharedObjects)
+				{
+					sharedObjects->share(stateGroup);
+				}
+				transform->addChild(stateGroup);
+				if (sharedObjects)
+				{
+					sharedObjects->share(transform);
+				}
+				scenegraph->addChild(transform);
+			}
+		}
+	}
+	return scenegraph;
+}
