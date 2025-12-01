@@ -38,6 +38,7 @@ namespace Bim
 			tinygltf::Model _model;
 			std::vector<Eigen::Matrix4d> _worldMatrices;
 			std::unordered_map<int, std::shared_ptr<Graphics::Mesh>> _nodeMeshDataMap;
+			bool isRebuildIndex = false;
 		};
 	}
 }

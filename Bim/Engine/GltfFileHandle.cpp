@@ -264,6 +264,7 @@ namespace Bim
 						}
 					}
 				}
+
 				//获取索引
 				std::vector<unsigned int> indices;
 				if (prim.indices >= 0) {
@@ -320,39 +321,130 @@ namespace Bim
 					}
 					positions.clear();
 					positions = tmpPositions;
+					isRebuildIndex = true;
 				}
+				modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
+
 				//得到世界坐标
 				//std::vector<float> worldPositions = GetWorldPositions(positions, nodeIndex);
 
 				//获取法向量
-				std::vector<float> normals;
-				auto normalAccessorIndex = prim.attributes.find("NORMAL");
-				if (normalAccessorIndex != prim.attributes.end()) {
-					const tinygltf::Accessor& accessor = model.accessors[normalAccessorIndex->second];
-					const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
-					const tinygltf::Buffer& buffer = model.buffers[view.buffer];
-					const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
-					size_t count = accessor.count;
-					size_t stride = accessor.ByteStride(view);
-					if (stride == 0) {
-						stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
-					}
-					for (size_t i = 0; i < count; ++i) {
-						const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
-						for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
-							normals.push_back(src[j]);
+				if (prim.mode == TINYGLTF_MODE_TRIANGLES)
+				{
+					std::vector<float> normals;
+					auto normalAccessorIndex = prim.attributes.find("NORMAL");
+					if (normalAccessorIndex != prim.attributes.end()) {
+						const tinygltf::Accessor& accessor = model.accessors[normalAccessorIndex->second];
+						const tinygltf::BufferView& view = model.bufferViews[accessor.bufferView];
+						const tinygltf::Buffer& buffer = model.buffers[view.buffer];
+						const unsigned char* dataPtr = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+						size_t count = accessor.count;
+						size_t stride = accessor.ByteStride(view);
+						if (stride == 0) {
+							stride = tinygltf::GetNumComponentsInType(accessor.type) * tinygltf::GetComponentSizeInBytes(accessor.componentType);
+						}
+						for (size_t i = 0; i < count; ++i) {
+							const float* src = reinterpret_cast<const float*>(dataPtr + i * stride);
+							for (int j = 0; j < tinygltf::GetNumComponentsInType(accessor.type); ++j) {
+								normals.push_back(src[j]);
+							}
 						}
 					}
-				}
-				//如果没有法向量，使用默认值
-				if (normals.empty())
-				{
-					for (size_t i = 0; i < positions.size() / 3; ++i)
+					else
 					{
-						normals.push_back(0.0f);
-						normals.push_back(0.0f);
-						normals.push_back(1.0f);
-					};
+						normals.clear();
+						normals.resize(positions.size(), 0.0f);  // 与 positions 同大小
+
+						// 遍历每个三角面
+						for (size_t i = 0; i < indices.size(); i += 3)
+						{
+							uint32_t i0 = indices[i] * 3;
+							uint32_t i1 = indices[i + 1] * 3;
+							uint32_t i2 = indices[i + 2] * 3;
+
+							// 顶点位置
+							Eigen::Vector3f v0(positions[i0], positions[i0 + 1], positions[i0 + 2]);
+							Eigen::Vector3f v1(positions[i1], positions[i1 + 1], positions[i1 + 2]);
+							Eigen::Vector3f v2(positions[i2], positions[i2 + 1], positions[i2 + 2]);
+
+							// 面法线
+							Eigen::Vector3f e1 = v1 - v0;
+							Eigen::Vector3f e2 = v2 - v0;
+							Eigen::Vector3f faceNormal = e1.cross(e2);
+
+							// 累加到顶点
+							normals[i0] += faceNormal.x();
+							normals[i0 + 1] += faceNormal.y();
+							normals[i0 + 2] += faceNormal.z();
+
+							normals[i1] += faceNormal.x();
+							normals[i1 + 1] += faceNormal.y();
+							normals[i1 + 2] += faceNormal.z();
+
+							normals[i2] += faceNormal.x();
+							normals[i2 + 1] += faceNormal.y();
+							normals[i2 + 2] += faceNormal.z();
+						}
+
+						// 归一化
+						for (size_t i = 0; i < normals.size(); i += 3)
+						{
+							Eigen::Vector3f n(normals[i], normals[i + 1], normals[i + 2]);
+							if (n.norm() > 1e-6f)
+								n.normalize();
+							normals[i] = n.x();
+							normals[i + 1] = n.y();
+							normals[i + 2] = n.z();
+						}
+					}
+					if (isRebuildIndex)
+					{
+						normals.clear();
+						//std::vector<float> normals;
+						normals.resize(positions.size(), 0.0f);  // 与 positions 同大小
+						// 遍历每个三角面
+						for (size_t i = 0; i < indices.size(); i += 3)
+						{
+							uint32_t i0 = indices[i] * 3;
+							uint32_t i1 = indices[i + 1] * 3;
+							uint32_t i2 = indices[i + 2] * 3;
+
+							// 顶点位置
+							Eigen::Vector3f v0(positions[i0], positions[i0 + 1], positions[i0 + 2]);
+							Eigen::Vector3f v1(positions[i1], positions[i1 + 1], positions[i1 + 2]);
+							Eigen::Vector3f v2(positions[i2], positions[i2 + 1], positions[i2 + 2]);
+
+							// 面法线
+							Eigen::Vector3f e1 = v1 - v0;
+							Eigen::Vector3f e2 = v2 - v0;
+							Eigen::Vector3f faceNormal = e1.cross(e2);
+
+							// 累加到顶点
+							normals[i0] += faceNormal.x();
+							normals[i0 + 1] += faceNormal.y();
+							normals[i0 + 2] += faceNormal.z();
+
+							normals[i1] += faceNormal.x();
+							normals[i1 + 1] += faceNormal.y();
+							normals[i1 + 2] += faceNormal.z();
+
+							normals[i2] += faceNormal.x();
+							normals[i2 + 1] += faceNormal.y();
+							normals[i2 + 2] += faceNormal.z();
+						}
+
+						// 归一化
+						for (size_t i = 0; i < normals.size(); i += 3)
+						{
+							Eigen::Vector3f n(normals[i], normals[i + 1], normals[i + 2]);
+							if (n.norm() > 1e-6f)
+								n.normalize();
+							normals[i] = n.x();
+							normals[i + 1] = n.y();
+							normals[i + 2] = n.z();
+						}
+					}
+					modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
 				}
 
 				//获取颜色
@@ -410,9 +502,7 @@ namespace Bim
 					geometry->material = modelMaterial;
 				}
 
-				modelMesh->vertices.insert(modelMesh->vertices.end(), std::make_move_iterator(positions.begin()), std::make_move_iterator(positions.end()));
 				modelMesh->indices.insert(modelMesh->indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
-				modelMesh->normals.insert(modelMesh->normals.end(), std::make_move_iterator(normals.begin()), std::make_move_iterator(normals.end()));
 				modelMesh->colors.insert(modelMesh->colors.end(), std::make_move_iterator(colors.begin()), std::make_move_iterator(colors.end()));
 				geometry->mesh = modelMesh;
 				nodeModel->geometries.push_back(geometry);
