@@ -1,0 +1,12 @@
+add_subdirectory(vsgdynamictexture)
+add_subdirectory(vsgdynamictexture_cs)
+add_subdirectory(vsgtexturearray)
+add_subdirectory(vsgstateswitch)
+add_subdirectory(vsgcomputevertex)
+add_subdirectory(vsgdynamicvertex)
+add_subdirectory(vsgclip)
+add_subdirectory(vsgextendstate)
+
+if (vsgImGui_FOUND)
+    add_subdirectory(vsgdynamicstate)
+endif()

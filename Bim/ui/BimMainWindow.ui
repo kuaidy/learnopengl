@@ -81,6 +81,7 @@
    <addaction name="action_3"/>
    <addaction name="action_4"/>
    <addaction name="ball"/>
+   <addaction name="delNode"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="modelline">
@@ -153,6 +154,14 @@
   <action name="menu_edit">
    <property name="text">
     <string>编辑</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="delNode">
+   <property name="text">
+    <string>删除模型</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

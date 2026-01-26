@@ -1,0 +1,11 @@
+add_subdirectory(vsgbuilder)
+add_subdirectory(vsggraphicspipelineconfigurator)
+add_subdirectory(vsgshaderset)
+add_subdirectory(vsgintersection)
+add_subdirectory(vsgstoragebuffer)
+add_subdirectory(vsgcustomshaderset)
+add_subdirectory(vsginstrumentation)
+
+if (Tracy_FOUND)
+    add_subdirectory(vsgtracyinstrumentation)
+endif()

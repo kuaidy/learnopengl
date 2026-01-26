@@ -1,0 +1,5 @@
+add_subdirectory(vsgcompilemanager)
+add_subdirectory(vsgreallocations)
+add_subdirectory(vsgtriangles)
+add_subdirectory(vsgunicode)
+add_subdirectory(vsgperformance)

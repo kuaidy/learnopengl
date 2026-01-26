@@ -43,6 +43,9 @@ public:
 	void InitGraphicsPipeline();
 	//void InitPhongShaderset();
 	vsg::ref_ptr<vsg::Group> CreateVsgNodeFromSceneNodeByPhong(const std::shared_ptr<Bim::Scene::Node>& node);
+	void ChangeVsgNodeColor(const vsg::ref_ptr<vsg::Node>& vsgNode);
+	vsg::ref_ptr<vsg::StateGroup> FindStateGroup(const vsg::ref_ptr<vsg::Node>& vsgNode);
+	void DelVsgNode();
 public slots:
 	void on_fileopen_triggered();
 	void on_modelline_triggered(bool flag);
@@ -50,6 +53,7 @@ public slots:
 	void on_ball_triggered(bool flag);
 	void on_menu_edit_triggered();
 	void on_build_triggered();
+	void on_delNode_triggered();
 private:
 	Ui::BimClass ui;
 	MyOpenGLWidget* m_MyOpenGlWidget;
@@ -74,4 +78,7 @@ private:
 	QTimer* m_animationTimer = nullptr;
 	vsg::ref_ptr<vsg::MatrixTransform> m_targetTransform;
 	vsg::ref_ptr<vsg::BindGraphicsPipeline>m_bindGraphicsPipeline;
+
+	int index = 0;
+	bool isDel = false;
 };

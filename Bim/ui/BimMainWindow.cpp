@@ -29,10 +29,32 @@ BimMainWindow::BimMainWindow(QWidget* parent,
 	windowTraits->depthFormat = VK_FORMAT_D32_SFLOAT;
 	//m_vsgScene = vsg::read_cast<vsg::Node>("C:/Users/kdyonly/Desktop/555.gltf",options);
 	m_vsgScene = vsg::Group::create();
-	if (!m_vsgScene)
-	{
-		return;
-	}
+
+	// 1. 强环境光（模拟天光漫反射）
+	auto ambient = vsg::AmbientLight::create();
+	ambient->color = { 1.0f, 1.0f, 1.0f };
+	ambient->intensity = 1.0f; // 关键：足够高
+
+	// 2. 多方向光（模拟间接光反弹）
+	auto light1 = vsg::DirectionalLight::create(); // 主光
+	light1->direction = { 0.0f, 0.0f, -1.0f };
+	light1->intensity = 100.0f;
+
+	auto light2 = vsg::DirectionalLight::create(); // 补光（左）
+	light2->direction = { 1.0f, 0.2f, -0.5f };
+	light2->intensity = 100.0f;
+	light2->color = { 0.9f, 0.9f, 1.0f };
+
+	auto light3 = vsg::DirectionalLight::create(); // 补光（右）
+	light3->direction = { -1.0f, 0.2f, -0.5f };
+	light3->intensity = 100.0f;
+	light3->color = { 1.0f, 0.9f, 0.9f };
+
+	m_vsgScene->addChild(ambient);
+	//m_vsgScene->addChild(light1);
+	//m_vsgScene->addChild(light2);
+	//m_vsgScene->addChild(light3);
+
 	// create the viewer that will manage all the rendering of the views
 	m_vsgViewer = vsgQt::Viewer::create();
 	auto window = CreateVsgWindow(m_vsgViewer, windowTraits, m_vsgScene, nullptr, "First Window");
@@ -182,6 +204,12 @@ void BimMainWindow::on_menu_edit_triggered() {
 	ui.mainToolBar->addWidget(edit_view);
 }
 
+
+void BimMainWindow::on_delNode_triggered()
+{
+	DelVsgNode();
+}
+
 /// <summary>
 /// 填充场景树
 /// </summary>
@@ -278,7 +306,6 @@ vsgQt::Window* BimMainWindow::CreateVsgWindow(vsg::ref_ptr<vsgQt::Viewer> viewer
 
 		camera = vsg::Camera::create(perspective, lookAt, vsg::ViewportState::create(VkExtent2D{ width, height }));
 	}
-
 
 	auto trackball = vsg::Trackball::create(camera, ellipsoidModel);
 	trackball->addWindow(*window);
@@ -389,10 +416,12 @@ void BimMainWindow::ShowScene(const std::shared_ptr<Bim::Scene::Node>& node, con
 	if (vsgNode)
 	{
 		parentGroup->addChild(vsgNode);
+		ChangeVsgNodeColor(vsgNode);
 	}
 	for (const auto& childNode : node->children) {
 		ShowScene(childNode, vsgNode);
 	}
+
 }
 
 
@@ -732,23 +761,30 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNodeByPhong(const 
 {
 	auto scenegraph = vsg::Group::create();
 
-	auto sharedObjects = vsg::SharedObjects::create();
+	//auto sharedObjects = vsg::SharedObjects::create();
 
 	auto shaderSet = vsg::createPhongShaderSet(m_vsgOptions);
-	auto graphicsPipelineConfig = vsg::GraphicsPipelineConfigurator::create(shaderSet);
+	//auto shaderSet = vsg::createFlatShadedShaderSet(m_vsgOptions);
+	//绘制成线模型
+	//auto rasterizationState = vsg::RasterizationState::create();
+	//rasterizationState->polygonMode = VK_POLYGON_MODE_LINE;
+	//rasterizationState->cullMode = VK_CULL_MODE_NONE;
+	//graphicsPipelineConfig->pipelineStates.push_back(rasterizationState);
 
-	auto mat = vsg::PhongMaterialValue::create();
-	mat->value().diffuse.set(1.0f, 1.0f, 1.0f, 1.0f);
-	mat->value().specular.set(1.0f, 0.0f, 0.0f, 1.0f); // red specular highlight
-	graphicsPipelineConfig->assignDescriptor("material", mat);
-	
-	
 	if (node->model)
 	{
 		for (auto& geometry : node->model->geometries)
 		{
 			if (geometry->mesh)
 			{
+				auto graphicsPipelineConfig = vsg::GraphicsPipelineConfigurator::create(shaderSet);
+				auto mat = vsg::PhongMaterialValue::create();
+				mat->value().ambient.set(0.5, 0.5, 0.5, 1.0);   // 非常高的环境光反射
+				mat->value().diffuse.set(0.5, 0.5, 0.5, 1.0);   // 极低的漫反射
+				mat->value().specular.set(0.0, 0.0, 0.0, 1.0);  // 无镜面
+				mat->value().shininess = 1.0f;
+				graphicsPipelineConfig->assignDescriptor("material", mat);
+
 				auto& mesh = geometry->mesh;
 				//顶点
 				static_assert(sizeof(vsg::vec3) == 3 * sizeof(float));
@@ -787,21 +823,39 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNodeByPhong(const 
 				drawCommands->addChild(vsg::BindIndexBuffer::create(indices));
 				drawCommands->addChild(vsg::DrawIndexed::create(indices->size(), 1, 0, 0, 0));
 
-				if (sharedObjects) sharedObjects->share(vertexArrays);
-				if (sharedObjects) sharedObjects->share(indices);
+				//if (sharedObjects) sharedObjects->share(vertexArrays);
+				//if (sharedObjects) sharedObjects->share(indices);
 
-				if (sharedObjects)
-				{
-					sharedObjects->share(drawCommands->children);
-					sharedObjects->share(drawCommands);
-				}
-				// share the pipeline config and initialize it if it's unique
-				if (sharedObjects)
-					sharedObjects->share(graphicsPipelineConfig, [](auto gpc) { gpc->init(); });
-				else
-					graphicsPipelineConfig->init();
+				//if (sharedObjects)
+				//{
+				//	sharedObjects->share(drawCommands->children);
+				//	sharedObjects->share(drawCommands);
+				//}
+				//// share the pipeline config and initialize it if it's unique
+				//if (sharedObjects)
+				//	sharedObjects->share(graphicsPipelineConfig, [](auto gpc) { gpc->init(); });
+				//else
+
+				auto rasterState = vsg::RasterizationState::create();
+				rasterState->cullMode = VK_CULL_MODE_NONE; // 关闭剔除
+				graphicsPipelineConfig->pipelineStates.push_back(rasterState);
+
+				graphicsPipelineConfig->init();
 				auto stateGroup = vsg::StateGroup::create();
-				graphicsPipelineConfig->copyTo(stateGroup, sharedObjects);
+
+	/*			auto descriptorSet = graphicsPipelineConfig->descriptorConfigurator->descriptorSets[1];
+				stateGroup->add(vsg::BindDescriptorSet::create(
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					graphicsPipelineConfig->layout,
+					0,
+					descriptorSet
+				));*/
+
+				graphicsPipelineConfig->copyTo(stateGroup);
+
+
+
+
 				// set up model transformation node
 				/*auto transform = vsg::MatrixTransform::create();
 				transform->subgraphRequiresLocalFrustum = false;*/
@@ -816,18 +870,88 @@ vsg::ref_ptr<vsg::Group> BimMainWindow::CreateVsgNodeFromSceneNodeByPhong(const 
 					transform->matrix = vsg::dmat4(node->localMatrix.data());
 				}
 				stateGroup->addChild(drawCommands);
-				if (sharedObjects)
-				{
-					sharedObjects->share(stateGroup);
-				}
+				/*	if (sharedObjects)
+					{
+						sharedObjects->share(stateGroup);
+					}*/
 				transform->addChild(stateGroup);
-				if (sharedObjects)
+				/*if (sharedObjects)
 				{
 					sharedObjects->share(transform);
-				}
+				}*/
 				scenegraph->addChild(transform);
 			}
 		}
 	}
 	return scenegraph;
+}
+
+void BimMainWindow::ChangeVsgNodeColor(const vsg::ref_ptr<vsg::Node>& vsgNode)
+{
+	//auto stateGroup = FindStateGroup(vsgNode);
+	//if (!stateGroup) return;
+	//vsg::ref_ptr<vsg::PhongMaterialValue> material;
+	//// 遍历所有 StateCommand，寻找 Descriptor
+	//for (auto& sc : stateGroup->stateCommands)
+	//{
+	//	auto bindDS = sc->cast<vsg::BindDescriptorSet>();
+	//	if (!bindDS) continue;
+
+	//	for (auto& d : bindDS->descriptorSet->descriptors)
+	//	{
+	//		// 找 binding=0 的材质
+	//		if (d->dstBinding != 0) continue;
+
+	//		// d 的真实类型是 DescriptorBuffer
+	//		auto descBuf = d->cast<vsg::DescriptorBuffer>();
+	//		if (!descBuf) continue;
+
+	//		if (descBuf->bufferInfoList.empty()) continue;
+
+	//		auto info = descBuf->bufferInfoList.front();
+	//		if (!info || !info->data) continue;
+
+	//		material = dynamic_cast<vsg::PhongMaterialValue*>(info->data.get());
+	//	}
+	//}
+
+	//// 如果没有材质，则创建
+	//if (!material)
+	//{
+	//	material = vsg::PhongMaterialValue::create();
+	//	material->value().diffuse.set(1.0f, 0.0f, 0.0f, 1.0f);
+	//	material->value().specular.set(1.0f, 1.0f, 1.0f, 1.0f);
+	//	material->value().shininess = 32.0f;
+
+	//	auto bufferInfo = vsg::BufferInfo::create(material);
+	//	auto descBuf = vsg::DescriptorBuffer::create(bufferInfo, 0); // binding = 0
+	//	stateGroup->add(descBuf);
+	//	return;
+	//}
+	//material->value().diffuse.set(1.0f, 0.0f, 0.0f, 1.0f); // 蓝色主体
+}
+
+vsg::ref_ptr<vsg::StateGroup> BimMainWindow::FindStateGroup(const vsg::ref_ptr<vsg::Node>& vsgNode)
+{
+	if (auto sg = vsgNode.cast<vsg::StateGroup>(); sg)
+		return sg;
+
+	if (auto group = vsgNode.cast<vsg::Group>(); group) {
+		for (auto& child : group->children) {
+			if (auto sg = FindStateGroup(child); sg)
+				return sg;
+		}
+	}
+
+	return {};
+}
+
+void BimMainWindow::DelVsgNode()
+{
+	for (int i = m_vsgScene->children.size() - 1; i >= 0; --i) {
+		if (!isDel) {
+			m_vsgScene->children.erase(m_vsgScene->children.begin() + i);
+			isDel = true;
+		}
+	}
 }

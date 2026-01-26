@@ -1,0 +1,32 @@
+#vsga 1.1.9
+Root id=1 vsg::TileDatabase
+{
+  userObjects 1
+  key "EllipsoidModel"
+  object id=2 vsg::EllipsoidModel
+  {
+    userObjects 0
+    radiusEquator 6378140
+    radiusPolar 6356750
+  }
+  settings id=3 vsg::TileDatabaseSettings
+  {
+    extents -180 -90 0 180 90 1
+    noX 2
+    noY 1
+    maxLevel 10
+    originTopLeft 0
+    lodTransitionScreenHeightRatio 0.25
+    projection ""
+    ellipsoidModel id=2
+    imageLayer "http://readymap.org/readymap/tiles/1.0.0/7/{z}/{x}/{y}.jpeg"
+    detailLayer ""
+    elevationLayer ""
+    elevationScale 32868
+    skirtRatio 0.02
+    maxTileDimension 1024
+    mipmapLevelsHint 16
+    lighting 1
+    shaderSet id=0
+  }
+}
